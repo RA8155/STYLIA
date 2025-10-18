@@ -141,6 +141,11 @@
         <span id="loading-message" class="text-sm font-semibold">Cargando...</span>
     </div>
 
+    <!-- Toast Notification (Pop-up Temporal) -->
+    <div id="toast-notification" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 p-3 bg-stylia-purple text-white text-sm font-semibold rounded-xl shadow-lg transition-opacity duration-300 z-50 opacity-0 pointer-events-none">
+        Tu outfit estará listo en breve
+    </div>
+
     <!-- Contenedor Principal de la App (Simulación de Móvil) -->
     <div id="app" class="app-container mx-auto max-w-sm border-x border-gray-200 bg-gray-50">
         
@@ -237,7 +242,7 @@
                         <span class="text-sm text-gray-600 font-semibold">Generando imagen con IA...</span>
                     </div>
                     <p id="image-error" class="text-sm text-red-600 font-semibold p-4 text-center hidden">
-                        ⚠️ No se pudo generar la imagen.
+                        ⚠️ No se pudo cargar la imagen.
                     </p>
                 </div>
                 
@@ -256,15 +261,15 @@
 
     <script>
         // --- CONSTANTES Y UTILIDADES DE GEMINI API ---
-        const API_KEY = "";
+        const API_KEY = "AIzaSyC8kVl1MKzNazA83iFtvcaCFcQJOZb_DP0";
         
         // Configuración para Generación de Texto (Asesor)
         const TEXT_MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
         const TEXT_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL_NAME}:generateContent?key=${API_KEY}`;
         
-        // Configuración para Generación de Imágenes (Detalles)
-        const IMAGE_MODEL_NAME = "imagen-3.0-generate-002";
-        const IMAGE_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL_NAME}:predict?key=${API_KEY}`;
+        // Configuración para Generación de Imágenes (Detalles) - COMENTADO PARA USAR IMÁGENES ESTÁTICAS
+        // const IMAGE_MODEL_NAME = "imagen-3.0-generate-002";
+        // const IMAGE_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL_NAME}:predict?key=${API_KEY}`;
         
         // Función para mostrar/ocultar el indicador de carga global
         function showLoading(message = 'Generando sugerencia...') {
@@ -276,6 +281,24 @@
         function hideLoading() {
             document.getElementById('loading-indicator').classList.remove('flex');
             document.getElementById('loading-indicator').classList.add('hidden');
+        }
+        
+        // --- Utilidad de Toast Notification (Añadido) ---
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            if (!toast) return;
+
+            toast.textContent = message;
+            
+            // Muestra el toast
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            // Oculta el toast después de 5 segundos (5000ms)
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 5000); 
         }
 
         /**
@@ -321,10 +344,11 @@
         }
         
         /**
-         * Llama a la API de generación de imágenes con backoff exponencial.
+         * Llama a la API de generación de imágenes con backoff exponencial. - FUNCIÓN COMENTADA
          * @param {string} prompt - La descripción de la imagen a generar.
          * @returns {string} Base64 data URL de la imagen.
          */
+        /*
         async function generateOutfitImage(prompt, retries = 3) {
             // Añadir la instrucción para asegurar que es una imagen de mujer
             const finalPrompt = `photo of a woman, professional fashion photography, stylish, wearing: ${prompt}`;
@@ -367,6 +391,7 @@
                 }
             }
         }
+        */
 
 
         // --- LÓGICA DE LA APP Y MÓDULOS EXISTENTES ---
@@ -408,38 +433,51 @@
                 items: [{ name: 'Blazer: Gris o gris carbón', detail: '' }, { name: 'Blusa: Blanco roto', detail: '' }, { name: 'Falda: Gris o gris carbón', detail: '' }] },
             { value: 'Dia_Relax', label: 'Día de Relax 🛋️', outfitName: 'Ropa casual de domingo', 
                 items: [{ name: 'Sudadera Oversize', detail: '' }, { name: 'Joggers Grises', detail: '' }] },
-            { value: 'Cena_Amigos', label: 'Cena 🥂', outfitName: 'Smart-Casual de Noche', 
-                items: [{ name: 'Blusa de Seda Roja', detail: '(Uso: 1)' }, { name: 'Pantalón Negro Skinny', detail: '(Limpio)' }, { name: 'Botines Negros', detail: '(Clásico de Invierno)' }] },
-            { value: 'Gimnasio', label: 'Gimnasio 💪', outfitName: 'Active Wear Funcional', 
-                items: [{ name: 'Top Deportivo Negro', detail: '(Alto Soporte)' }, { name: 'Leggings Transpirables', detail: '(En uso)' }, { name: 'Tenis de Running', detail: '(Máximo Agarre)' }] }
+            { value: 'Cena_Amigos', label: 'Cena 🥂', outfitName: 'Outfit de Noche', 
+                items: [{ name: 'Blusa de Seda: Rojo', detail: '' }, { name: 'Pantalón Skinny: Negro', detail: '' }] },
+            { value: 'Gimnasio', label: 'Gimnasio 💪', outfitName: 'Outfit de Gym', 
+                items: [{ name: 'Top Deportivo: Negro', detail: '' }, { name: 'Leggings Transpirables', detail: '' }] }
         ];
         let currentEvent = eventOptions[0].value; // Evento seleccionado por defecto
         
-        // --- Nuevos Outfits de Fallback para la sección "Ayuda" (AHORA CON DESCRIPCIONES DETALLADAS PARA LA IA) ---
+        // --- Nuevos Outfits de Fallback para la sección "Ayuda" (AHORA CON IMAGEN ESTÁTICA) ---
+        // Se añaden las URLs estáticas para reemplazar la generación en tiempo real.
         const fallbackOutfits = [
             { 
                 id: 1, 
-                name: 'Casual de Oficina', 
-                type: 'Formal', 
-                items: ['Blazer negro entallado', 'Camisa blanca de seda', 'Jeans de mezclilla oscura rectos', 'Botines de tacón bajo'], 
-                icon: '💼', 
-                promptDescription: 'a black fitted blazer, a white silk shirt, dark wash straight denim jeans, and low-heeled booties. Modern office setting.' 
+                name: 'Cómodo', 
+                type: 'Casual', 
+                items: ['Camisa Oversize de Rayas', 'Jeans Anchos'], 
+                icon: '🛏️', 
+                promptDescription: 'a black fitted blazer, a white silk shirt, dark wash straight denim jeans, and low-heeled booties. Modern office setting.',
+                staticImageUrl: 'https://images.pexels.com/photos/1570768/pexels-photo-1570768.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Oficina
             },
             { 
                 id: 2, 
-                name: 'Noche de Cóctel', 
+                name: 'Elegante', 
                 type: 'Glam', 
-                items: ['Vestido midi ajustado de terciopelo azul', 'Tacones de aguja negros', 'Pendientes colgantes XL de oro'], 
-                icon: '🍸', 
-                promptDescription: 'a fitted blue velvet midi dress, black stiletto heels, and large gold drop earrings. Elegant party background.' 
+                items: ['Vestido midi ajustado de terciopelo azul'], 
+                icon: '✨', 
+                promptDescription: 'a fitted blue velvet midi dress, black stiletto heels, and large gold drop earrings. Elegant party background.',
+                staticImageUrl: 'https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Cóctel
             },
             { 
                 id: 3, 
-                name: 'Fin de Semana Relax', 
-                type: 'Relax', 
-                items: ['Sudadera oversize color beige', 'Joggers deportivos grises', 'Zapatillas deportivas blancas', 'Gorra de béisbol'], 
-                icon: '☕', 
-                promptDescription: 'an oversized beige sweatshirt, grey athletic joggers, white sneakers, and a baseball cap. Cozy home environment.' 
+                name: 'Business casual', 
+                type: 'Business', 
+                items: ['Cárdigan de punto', 'Pantalón recto tobillero'], 
+                icon: '💼', 
+                promptDescription: 'an oversized beige sweatshirt, grey athletic joggers, white sneakers, and a baseball cap. Cozy home environment.',
+                staticImageUrl: 'https://images.pexels.com/photos/3757943/pexels-photo-3757943.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Relax
+            },
+            { 
+                id: 4, 
+                name: 'Look sofisticado', 
+                type: 'Monocromático', 
+                items: ['Camisa amplia de hombros caídos', 'Pantalón recto'], 
+                icon: '👠', 
+                promptDescription: 'an oversized beige sweatshirt, grey athletic joggers, white sneakers, and a baseball cap. Cozy home environment.',
+                staticImageUrl: 'https://images.pexels.com/photos/3757943/pexels-photo-3757943.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Relax
             },
         ];
 
@@ -473,10 +511,11 @@
         }
 
         /**
-         * Muestra los detalles de un outfit simple (con imagen GENERADA POR IA) en el modal.
+         * Muestra los detalles de un outfit simple (con imagen ESTÁTICA) en el modal.
+         * Se ha modificado para cargar la URL de imagen estática en lugar de generar con IA.
          * @param {number} outfitId - El ID del outfit en fallbackOutfits.
          */
-        async function showOutfitDetails(outfitId) {
+        function showOutfitDetails(outfitId) {
             const outfit = fallbackOutfits.find(o => o.id === outfitId);
             if (!outfit) return;
 
@@ -496,24 +535,20 @@
             `;
             document.getElementById('simple-details-list').innerHTML = itemsHTML;
 
-            // 2. Muestra el modal en modo 'details' y reinicia el estado de la imagen
+            // 2. Muestra el modal en modo 'details'
             openLookModal('details');
-            imgElement.src = '';
-            imgElement.classList.add('hidden');
-            imgError.classList.add('hidden');
-            imgLoading.classList.remove('hidden');
 
-            // 3. Genera la imagen
-            try {
-                const imageUrl = await generateOutfitImage(outfit.promptDescription);
-                imgElement.src = imageUrl;
-                imgElement.classList.remove('hidden');
-            } catch (error) {
-                console.error("Fallo al generar la imagen:", error);
-                imgError.classList.remove('hidden');
-            } finally {
-                imgLoading.classList.add('hidden');
-            }
+            // 3. Carga la imagen estática y actualiza el estado de la UI
+            const imageUrl = outfit.staticImageUrl;
+            imgElement.src = imageUrl;
+            
+            // Oculta el indicador de carga y el error, muestra la imagen.
+            imgLoading.classList.add('hidden');
+            imgError.classList.add('hidden');
+            imgElement.classList.remove('hidden'); 
+            
+            // NOTA: Se ha eliminado el bloque try/catch asíncrono y la llamada a generateOutfitImage
+            // para usar la URL estática de forma directa.
         }
 
 
@@ -601,14 +636,13 @@
                     </div>
                 </div>
 
-                <!-- Botón Principal (Preparar Outfit Ahora) -->
-                <button class="stylia-btn-primary w-full p-3 rounded-xl text-lg font-bold flex items-center justify-center mt-4">
-                    Preparar Outfit Ahora 🚀
+                <!-- Botón Principal (Preparar Outfit Ahora) - Modificado para mostrar el Toast -->
+                <button onclick="showToast('Tu outfit estará listo en breve')" class="stylia-btn-primary w-full p-3 rounded-xl text-lg font-bold flex items-center justify-center mt-4">
+                    Preparar Outfit Ahora
                 </button>
 
                 <!-- Texto Secundario (Llamada al Modal No Sé Qué Ponerme) -->
                 <button onclick="openLookModal('ai')" class="w-full text-sm font-semibold text-stylia-purple/80 hover:text-stylia-purple transition stylia-btn-secondary p-1">
-                    ¡Ayuda! Analizar mi look
                 </button>
             `;
         }
@@ -693,7 +727,7 @@
                 <!-- NUEVA SECCIÓN: Ayuda No Sé Qué Ponerme (Ahora dentro de una tarjeta 'stylia-card') -->
                 <section class="stylia-card p-5 space-y-4 mt-6 bg-white border border-gray-100">
                     <h2 class="text-xl font-extrabold mb-2 text-gray-800 flex items-center">
-                        ❓ Ayuda: No Sé Qué Ponerme
+                        ¡Ayuda! No sé qué ponerme
                     </h2>
                     <p class="text-sm text-gray-600 mb-4">
                         Explora sugerencias rápidas basadas en el estilo general.
