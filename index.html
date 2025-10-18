@@ -2,14 +2,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STYLIA - M-commerce de Estilo Inteligente</title>
+    <title>STYLIA App</title>
     <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Configuración de fuente y modo oscuro */
         :root {
-            --color-primary: #8a2be2; /* Azul violeta para STYLIA (Blue Violet) */
-            --color-secondary: #ff69b4; /* Rosa brillante (Hot Pink) */
+            --color-primary: #efb810; /* Azul violeta para STYLIA (Blue Violet) */
+            --color-secondary: #daa520; /* Rosa brillante (Hot Pink) */
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -36,7 +36,7 @@
         
         /* PRIMARY BUTTON STYLES (Gradiente) */
         .stylia-btn-primary {
-            background-image: linear-gradient(to right, var(--color-primary), #6a1b9a);
+            background-image: linear-gradient(to right, var(--color-primary), #daa520);
             color: white;
             border: none;
             transition: all 0.2s;
@@ -157,8 +157,8 @@
             theme: {
                 extend: {
                     colors: {
-                        'stylia-purple': '#8a2be2',
-                        'stylia-pink': '#ff69b4',
+                        'stylia-purple': '#efb810',
+                        'stylia-pink': '#daa520',
                     }
                 }
             }
@@ -186,8 +186,8 @@
             <h1 id="headerTitle" class="text-xl font-extrabold text-stylia-purple flex items-center">
                 STYLIA <span id="headerTagline" class="text-xs ml-2 text-gray-500 font-medium"></span>
             </h1>
-            <!-- Icono de Notificaciones simple (sin contador) -->
-            <button id="notificationButton" onclick="showModule('notificaciones')" class="text-2xl text-gray-500">
+            <!-- Icono de Notificaciones simple (AHORA RELATIVO PARA EL CONTADOR) -->
+            <button id="notificationButton" onclick="showModule('notificaciones')" class="text-2xl text-gray-500 relative">
                 🔔
             </button>
         </header>
@@ -316,6 +316,10 @@
         let currentStyle = 'Casual Chic';
         let tshirtSize = 'M';
         let favoriteColors = ['#ff69b4', '#FFFFFF', '#3B82F6']; // Rosa, Blanco, Azul
+
+        // *** MODIFICACIÓN AQUÍ: AÑADIDA LA VARIABLE PARA LA URL DE LA IMAGEN ESTATICA ***
+        let staticLookImageURL = 'https://github.com/RA8155/STYLIA/blob/main/Stylia%20Logo.jpg?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'; // Imagen de mujer con estilo elegante
+        // *** FIN MODIFICACIÓN ***
 
         // --- ESTADO DEL MÓDULO ARMARIO (Nuevo) ---
         let currentArmarioFilter = 'Todo'; 
@@ -461,39 +465,276 @@
             'perfil': document.getElementById('nav-perfil'), 
         };
 
-        // --- Datos de Ejemplo (Mock Data) ---
-        // MODIFICACIÓN: Se añade el campo 'category' para permitir el filtrado granular.
-        const mockInventory = [
-            { id: 1, name: 'Camiseta Blanca', type: 'Superior', category: 'Camisetas y Blusas', color: 'Blanco', uses: 15, lastUsed: 'Ayer', needsWash: true, imageUrl: 'https://placehold.co/100x100/eeeeee/333333?text=T-Shirt' },
-            { id: 2, name: 'Pantalón Jeans Negro', type: 'Inferior', category: 'Pantalones y Faldas', color: 'Negro', material: 'Denim', uses: 12, lastUsed: 'Hace 3 días', needsWash: false, imageUrl: 'https://placehold.co/100x100/444444/ffffff?text=Jeans' },
-            { id: 3, name: 'Chaqueta Vaquera', type: 'Exterior', category: 'Abrigos y Chaquetas', color: 'Azul Denim', material: 'Denim', uses: 2, lastUsed: 'Hace 4 meses', needsWash: false, imageUrl: 'https://placehold.co/100x100/5c7b9e/ffffff?text=Denim+Jacket' },
-            // Se transforma la Camiseta Oversize a una Sudadera para demostrar el filtro
-            { id: 4, name: 'Sudadera Oversize', type: 'Superior', category: 'Sudaderas', color: 'Gris', material: 'Algodón', uses: 20, lastUsed: 'Ayer', needsWash: false, imageUrl: 'https://placehold.co/100x100/cccccc/333333?text=Hoodie' }, 
-            { id: 5, name: 'Blusa de Seda Roja', type: 'Superior', category: 'Camisetas y Blusas', color: 'Rojo', uses: 1, lastUsed: 'Hace 6 meses', needsWash: false, imageUrl: 'https://placehold.co/100x100/a30000/ffffff?text=Blouse' },
-        ];
+// --- Datos de Ejemplo (Mock Data) ---
+const mockInventory = [
+    { 
+        id: 1, 
+        name: 'Camiseta Blanca', 
+        type: 'Superior', 
+        category: 'Camisetas y Blusas', 
+        color: 'Blanco', 
+        uses: 15, 
+        lastUsed: 'Ayer', 
+        needsWash: true, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Camiseta%20blanca.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    },
+    { 
+        id: 2, 
+        name: 'Pantalones negros', 
+        type: 'Inferior', 
+        category: 'Pantalones y Faldas', 
+        color: 'Negro', 
+        material: 'Denim', 
+        uses: 12, 
+        lastUsed: 'Hace 3 días', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Pantalones%20negros.png?raw=true' 
+    },
+    { 
+        id: 3, 
+        name: 'Chaqueta Vaquera', 
+        type: 'Exterior', 
+        category: 'Abrigos y Chaquetas', 
+        color: 'Azul Denim', 
+        material: 'Denim', 
+        uses: 2, 
+        lastUsed: 'Hace 4 meses', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Chaqueta%20vaquera.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    },
+    { 
+        id: 4, 
+        name: 'Sudadera Oversize', 
+        type: 'Superior', 
+        category: 'Sudaderas', 
+        color: 'Gris', 
+        material: 'Algodón', 
+        uses: 20, 
+        lastUsed: 'Ayer', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Sudadera%20Oversize.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 5, 
+        name: 'Blusa de Seda Roja', 
+        type: 'Superior', 
+        category: 'Camisetas y Blusas', 
+        color: 'Rojo', 
+        uses: 1, 
+        lastUsed: 'Hace 6 meses', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Blusa%20de%20seda.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 6, 
+        name: 'Top marrón claro', 
+        type: 'Superior', 
+        category: 'Camisetas y Blusas', 
+        color: 'marrón', 
+        uses: 21, 
+        lastUsed: 'Hoy', 
+        needsWash: true, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Top%20marr%C3%B3n%20claro.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 7, 
+        name: 'Pantalones vaqueros', 
+        type: 'Superior', 
+        category: 'Pantalones y Faldas', 
+        color: 'vaquero', 
+        uses: 32, 
+        lastUsed: 'Hace 2 días', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Pantalones%20vaqueros.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 8, 
+        name: 'Mono de estilo sastre', 
+        type: 'Superior', 
+        category: 'Camisetas y Blusas', 
+        color: 'Negro', 
+        uses: 2, 
+        lastUsed: 'Hace 2 meses', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Mono%20de%20estilo%20sastre.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 9, 
+        name: 'Blazer beige', 
+        type: 'Superior', 
+        category: 'Abrigos y Chaquetas', 
+        color: 'Beige', 
+        uses: 4, 
+        lastUsed: 'La semana pasada', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Blazer%20beige.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 10, 
+        name: 'Camiseta de punto', 
+        type: 'Superior', 
+        category: 'Camisetas y Blusas', 
+        color: 'Beige', 
+        uses: 22, 
+        lastUsed: 'Hace 4 días', 
+        needsWash: true, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Camiseta%20de%20punto.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 11, 
+        name: 'Abrigo gris oscuro', 
+        type: 'Superior', 
+        category: 'Abrigos y Chaquetas', 
+        color: 'Gris oscuro', 
+        uses: 6, 
+        lastUsed: 'Hace 13 días', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Abrigo%20gris%20oscuro.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 12, 
+        name: 'Blusa de flores', 
+        type: 'Superior', 
+        category: 'Camisetas y Blusas', 
+        color: '', 
+        uses: 5, 
+        lastUsed: 'Hace 7 días', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Blusa%20de%20flores.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 13, 
+        name: 'Sudadera azul', 
+        type: 'Superior', 
+        category: 'Sudaderas', 
+        color: 'Azul', 
+        uses: 15, 
+        lastUsed: 'Ayer', 
+        needsWash: true, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Sudadera%20azul.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 14, 
+        name: 'Pantalones verdes', 
+        type: 'Superior', 
+        category: 'Pantalones y Faldas', 
+        color: 'Verde', 
+        uses: 8, 
+        lastUsed: 'Hace 3 días', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Pantalones%20verdes.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    }, 
+    { 
+        id: 15, 
+        name: 'Chaqueta Blanca', 
+        type: 'Superior', 
+        category: 'Abrigos y Chaquetas', 
+        color: 'Blanco', 
+        uses: 10, 
+        lastUsed: 'Hace 9 días', 
+        needsWash: false, 
+        // CAMBIO AQUÍ: Ruta relativa a tu archivo local
+        imageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Chaqueta%20blanca.png?raw=trueauto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' 
+    },
+];
         
         // Transforma el inventario en un string para el prompt de IA
         const inventoryContext = mockInventory.map(item => 
             `ID ${item.id}: ${item.name} (${item.type}, Color: ${item.color}, Usos: ${item.uses}${item.material ? ', Material: ' + item.material : ''}, Último Uso: ${item.lastUsed})`
         ).join('\n');
 
-        // Datos de notificaciones originales (sin el estado 'unread')
+        // Datos de notificaciones (AHORA CON EL ESTADO 'isRead')
         const mockNotifications = [
-            { type: 'look', icon: '✨', title: 'Tiempo de hoy', content: 'El pronóstico es de 25°C y sol.', time: 'Hace 5 min' },
-            { type: 'maint', icon: '🧺', title: 'Recordatorio de Mantenimiento', content: 'Tu Camiseta Blanca ya se ha usado 3 veces. Es hora de lavarla.', time: 'Hace 1 hora' },
-            { type: 'offer', icon: '🏷️', title: 'Oferta Personalizada (-20%)', content: 'La chaqueta negra que viste en ASOS ahora tiene un descuento del 20% en tu talla.', time: 'Ayer' },
-            { type: 'alert', icon: '🚨', title: 'Alerta de Inventario', content: 'Parece que no has usado tu Chaqueta Vaquera en 4 meses.', time: 'Hace 2 días' },
+            { type: 'look', icon: '✨', title: 'Tiempo de hoy', content: 'El pronóstico es de 25°C y sol.', time: 'Hace 5 min', isRead: false },
+            { type: 'maint', icon: '🧺', title: 'Recordatorio de Mantenimiento', content: 'Tu Camiseta Blanca ya se ha usado 3 veces. Es hora de lavarla.', time: 'Hace 1 hora', isRead: false },
+            { type: 'offer', icon: '🏷️', title: 'Oferta Personalizada (-20%)', content: 'La chaqueta negra que viste en ASOS ahora tiene un descuento del 20% en tu talla.', time: 'Ayer', isRead: true },
+            { type: 'alert', icon: '🚨', title: 'Alerta de Inventario', content: 'Parece que no has usado tu Chaqueta Vaquera en 4 meses.', time: 'Hace 2 días', isRead: false },
         ];
+
+        // --- ESTADO Y LÓGICA DE NOTIFICACIONES (NUEVO) ---
+        let unreadCount = 0; 
+
+        /**
+         * Calcula el número de no leídas y actualiza visualmente los botones de navegación.
+         */
+        function updateUnreadCount() {
+            unreadCount = mockNotifications.filter(n => !n.isRead).length;
+            
+            // 1. Actualizar el botón de la cabecera (Header) con un badge
+            const headerBtn = document.getElementById('notificationButton');
+            if (headerBtn) {
+                headerBtn.innerHTML = `
+                    🔔
+                    ${unreadCount > 0 ? 
+                        // Badge rojo para el contador en la esquina
+                        `<span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">${unreadCount}</span>` : 
+                        ''
+                    }
+                `;
+            }
+
+            // 2. Actualizar el botón de la navegación inferior (Nav) con el contador
+            const navBtn = document.getElementById('nav-notificaciones');
+            if (navBtn) {
+                // Selecciona el span que contiene el texto "Alertas"
+                const navTextSpan = navBtn.querySelector('.text-xs');
+                if (navTextSpan) {
+                    navTextSpan.innerHTML = `
+                        Alertas
+                        ${unreadCount > 0 ? 
+                            // Contador de no leídas junto al texto
+                            `<span class="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">${unreadCount}</span>` : 
+                            ''
+                        }
+                    `;
+                }
+            }
+        }
         
+        /**
+         * Marca todas las notificaciones como leídas, actualiza el estado y la UI.
+         */
+        function markAllAsRead() {
+            let markedCount = 0;
+            mockNotifications.forEach(notif => {
+                if (!notif.isRead) {
+                    notif.isRead = true;
+                    markedCount++;
+                }
+            });
+
+            if (markedCount > 0) {
+                updateUnreadCount(); // El contador se reducirá a 0
+                showModule('notificaciones'); // Re-renderiza el módulo para actualizar el botón y los indicadores
+                showToast(`✅ ${markedCount} notificaciones marcadas como leídas.`);
+            } else {
+                showToast(`ℹ️ No tienes notificaciones sin leer.`);
+            }
+        }
+
         // --- Datos y Lógica Específica del Módulo LOOK ---
         const eventOptions = [
-            { value: 'Reunion_Formal', label: 'Reunión 💼', outfitName: 'Traje Ejecutivo Clásico', 
+            { value: 'Reunion_Formal', label: 'Reunión', outfitName: 'Traje Ejecutivo Clásico', 
                 items: [{ name: 'Blazer: Gris o gris carbón', detail: '' }, { name: 'Blusa: Blanco roto', detail: '' }, { name: 'Falda: Gris o gris carbón', detail: '' }] },
-            { value: 'Dia_Relax', label: 'Día de Relax 🛋️', outfitName: 'Ropa casual de domingo', 
+            { value: 'Dia_Relax', label: 'Relax', outfitName: 'Ropa casual de domingo', 
                 items: [{ name: 'Sudadera Oversize', detail: '' }, { name: 'Joggers Grises', detail: '' }] },
-            { value: 'Cena_Amigos', label: 'Cena 🥂', outfitName: 'Outfit de Noche', 
+            { value: 'Cena_Amigos', label: 'Cena', outfitName: 'Outfit de Noche', 
                 items: [{ name: 'Blusa de Seda: Rojo', detail: '' }, { name: 'Pantalón Skinny: Negro', detail: '' }] },
-            { value: 'Gimnasio', label: 'Gimnasio 💪', outfitName: 'Outfit de Gym', 
+            { value: 'Gimnasio', label: 'Gimnasio', outfitName: 'Outfit de Gym', 
                 items: [{ name: 'Top Deportivo: Negro', detail: '' }, { name: 'Leggings Transpirables', detail: '' }] }
         ];
         let currentEvent = eventOptions[0].value; // Evento seleccionado por defecto
@@ -504,37 +745,37 @@
                 id: 1, 
                 name: 'Cómodo', 
                 type: 'Casual', 
-                items: ['Camisa Oversize de Rayas', 'Jeans Anchos'], 
+                items: ['Top marrón claro', 'Jeans anchos'], 
                 icon: '🛏️', 
                 promptDescription: 'a black fitted blazer, a white silk shirt, dark wash straight denim jeans, and low-heeled booties. Modern office setting.',
-                staticImageUrl: 'https://images.pexels.com/photos/1570768/pexels-photo-1570768.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Oficina
+                staticImageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Outfit%201.png?raw=trueauto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Oficina
             },
             { 
                 id: 2, 
                 name: 'Elegante', 
                 type: 'Glam', 
-                items: ['Vestido midi ajustado de terciopelo azul'], 
+                items: ['Mono de estilo sastre'], 
                 icon: '✨', 
                 promptDescription: 'a fitted blue velvet midi dress, black stiletto heels, and large gold drop earrings. Elegant party background.',
-                staticImageUrl: 'https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Cóctel
+                staticImageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Outfit%202.png?raw=trueauto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Cóctel
             },
             { 
                 id: 3, 
-                name: 'Business casual', 
-                type: 'Business', 
-                items: ['Cárdigan de punto', 'Pantalón recto tobillero'], 
-                icon: '💼', 
+                name: 'Informal', 
+                type: 'Informal', 
+                items: ['Blazer', 'Camiseta de punto', 'Jeans'], 
+                icon: '👚', 
                 promptDescription: 'an oversized beige sweatshirt, grey athletic joggers, white sneakers, and a baseball cap. Cozy home environment.',
-                staticImageUrl: 'https://images.pexels.com/photos/3757943/pexels-photo-3757943.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Relax
+                staticImageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Outfit%203.png?raw=trueauto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Relax
             },
             { 
                 id: 4, 
-                name: 'Look sofisticado', 
-                type: 'Monocromático', 
-                items: ['Camisa amplia de hombros caídos', 'Pantalón recto'], 
-                icon: '👠', 
+                name: 'Business Casual', 
+                type: 'Business', 
+                items: ['Abrigo gris oscuro', 'Top beige', 'pantalones negros'], 
+                icon: '💼', 
                 promptDescription: 'an oversized beige sweatshirt, grey athletic joggers, white sneakers, and a baseball cap. Cozy home environment.',
-                staticImageUrl: 'https://images.pexels.com/photos/3757943/pexels-photo-3757943.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Relax
+                staticImageUrl: 'https://github.com/RA8155/STYLIA/blob/main/Outfit%204.png?raw=trueauto=compress&cs=tinysrgb&dpr=1&w=500' // URL de tu imagen de Relax
             },
         ];
 
@@ -592,7 +833,7 @@
             document.getElementById('simple-details-title').innerHTML = `${outfit.icon} ${outfit.name}`;
             
             const itemsHTML = `
-                <p class="font-bold text-stylia-purple mb-2">Prendas Clave:</p>
+                <p class="font-bold text-stylia-Black mb-2">Prendas:</p>
                 <ul class="list-disc pl-5 space-y-1 text-sm">
                     ${outfit.items.map(item => `<li>${item}</li>`).join('')}
                 </ul>
@@ -693,9 +934,9 @@
 
             return `
                 <div class="flex space-x-4 items-start">
-                    <!-- Outfit Visual Block (Estilo de la Imagen) -->
-                    <div class="w-24 h-24 rounded-xl flex items-center justify-center text-stylia-purple font-bold text-lg p-2 shadow-lg flex-shrink-0" style="background-image: linear-gradient(135deg, #a78bfa, #8a2be2); color: white;">
-                        Look
+                    <!-- Outfit Visual Block (Estilo de la Imagen) - MODIFICACIÓN AQUI -->
+                    <div class="w-24 h-24 rounded-xl flex items-center justify-center text-stylia-purple font-bold text-lg p-2 flex-shrink-0 overflow-hidden shadow-lg border-2 border-stylia-purple/50">
+                        <img src="${staticLookImageURL}" alt="Look Recomendado" class="w-full h-full object-cover">
                     </div>
 
                     <!-- Detalles del Look -->
@@ -889,8 +1130,8 @@
 
 
             return `
-                <h3 class="text-2xl font-bold text-stylia-purple mb-6 text-center">
-                    ✏️ Editar Preferencias
+                <h3 class="text-2xl font-bold text-stylia-black mb-6 text-center">
+                    Editar Preferencias
                 </h3>
 
                 <!-- SECCIÓN ESTILO -->
@@ -903,7 +1144,7 @@
 
                 <!-- SECCIÓN TALLA -->
                 <div class="mb-6 border-t pt-4 border-gray-100">
-                    <label class="block text-base font-semibold text-gray-800 mb-3">Talla de Camiseta (Top):</label>
+                    <label class="block text-base font-semibold text-gray-800 mb-3">Talla de Camiseta:</label>
                     <div class="flex flex-wrap space-x-1 justify-center">
                         ${sizeOptionsHTML}
                     </div>
@@ -912,7 +1153,6 @@
                 <!-- SECCIÓN COLORES -->
                 <div class="mb-6 border-t pt-4 border-gray-100">
                     <label class="block text-base font-semibold text-gray-800 mb-3">Colores Favoritos (Máx. 3):</label>
-                    <p class="text-xs text-gray-500 mb-4">Selecciona hasta 3 colores para looks personalizados.</p>
                     <div class="flex flex-wrap gap-4 justify-center">
                         ${colorOptionsHTML}
                     </div>
@@ -990,8 +1230,8 @@
 
                 <!-- Contexto Diario Card (Ahora con Select para Evento) -->
                 <section class="stylia-card p-5 mb-6 space-y-3 bg-white">
-                    <h3 class="text-lg font-bold text-stylia-purple flex items-center mb-3">
-                        🗓️ Información de hoy
+                    <h3 class="text-lg font-bold text-stylia-black flex items-center mb-3">
+                        Información de hoy
                     </h3>
                     <div class="grid grid-cols-3 gap-4 text-sm text-gray-700">
                         <!-- Fecha -->
@@ -1019,7 +1259,7 @@
 
                 <!-- Tu Look Recomendado por IA Card (Contenido Dinámico) -->
                 <section class="stylia-card p-5 space-y-4 bg-white border border-stylia-purple/20">
-                    <h3 class="text-xl font-extrabold text-stylia-purple">Tu look recomendado por IA</h3>
+                    <h3 class="text-xl font-extrabold text-stylia-black">Looks recomendados por IA</h3>
                     
                     <!-- Contenedor para inyectar los detalles del look, que se actualizará con JS -->
                     <div id="recommendedLookDetails">
@@ -1033,10 +1273,7 @@
                     <h2 class="text-xl font-extrabold mb-2 text-gray-800 flex items-center">
                         ¡Ayuda! No sé qué ponerme
                     </h2>
-                    <p class="text-sm text-gray-600 mb-4">
-                        Explora sugerencias rápidas basadas en el estilo general.
-                    </p>
-
+                   
                     <div class="grid grid-cols-2 gap-4">
                         ${fallbackOutfits.map(outfit => `
                             <!-- Tarjeta interna de outfit -->
@@ -1044,7 +1281,7 @@
                                 <span class="text-3xl mb-2">${outfit.icon}</span>
                                 <p class="text-sm font-semibold text-gray-800 truncate w-full">${outfit.name}</p>
                                 <p class="text-xs text-gray-500 mt-1 h-8 overflow-hidden">${outfit.items.join(' + ')}</p>
-                                <button onclick="showOutfitDetails(${outfit.id})" class="mt-3 text-xs text-stylia-pink border border-stylia-pink/50 bg-stylia-pink/5 p-1 rounded-full font-semibold w-full stylia-btn-secondary">
+                                <button onclick="showOutfitDetails(${outfit.id})" class="mt-3 text-xs text-stylia-black border border-stylia-black bg-stylia-grey p-1 rounded-full font-semibold w-full stylia-btn-secondary">
                                     Ver Detalles
                                 </button>
                             </div>
@@ -1077,7 +1314,7 @@
             
             // Módulo de Mi Armario Digital (Gestión de Inventario)
             const armarioContent = `
-                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Mi Armario Digital (${filteredInventory.length} / ${mockInventory.length} prendas)</h2>
+                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">${mockInventory.length} prendas</h2>
 
                 <!-- Filtros y Opciones (INTERACTIVOS - MODIFICACIÓN DE BOTONES) -->
                 <div class="flex space-x-2 overflow-x-auto pb-3 mb-4">
@@ -1100,7 +1337,7 @@
                 <div class="space-y-3">
                     <!-- Sincronización en Tiempo Real -->
                     <div class="flex items-center text-sm text-green-600 bg-green-50 p-3 rounded-xl">
-                        <span class="mr-2">🔄</span>
+                        <span class="mr-2"></span>
                         Sincronizado: Última actualización hace 5 segundos.
                     </div>
                     ${filteredInventory.length === 0 ? 
@@ -1122,9 +1359,7 @@
                             
                             <!-- FUNCIÓN GEMINI: Mantenimiento -->
                             <div class="mt-3 pt-3 border-t border-gray-100">
-                                <button onclick="askMaintenanceAdvice('${item.name}')" class="w-full text-xs text-stylia-pink border border-stylia-pink/50 bg-stylia-pink/5 p-2 rounded-lg font-semibold flex items-center justify-center stylia-btn-secondary">
-                                    ✨ Pedir Consejo de Cuidado
-                                </button>
+                                
                                 <div id="maintenance-result-${item.id}" class="mt-2 text-xs text-gray-600 p-2 bg-gray-100 rounded hidden whitespace-pre-wrap"></div>
                             </div>
                         </div>
@@ -1146,7 +1381,7 @@
             const statsContent = `
                 <!-- Resumen de Uso General -->
                 <section class="stylia-card p-5 mb-6 space-y-3">
-                    <h3 class="text-lg font-bold text-stylia-pink">Resumen Global (Últimos 30 días)</h3>
+                    <h3 class="text-lg font-bold text-black">Resumen Global (Últimos 30 días)</h3>
                     <div class="flex justify-around text-center">
                         <div>
                             <p class="text-3xl font-extrabold text-stylia-purple">${totalUses}</p>
@@ -1187,9 +1422,6 @@
                                 <p class="text-xs text-gray-500">Más usada: ${mostUsedItem.uses} veces</p>
                             </div>
                         </div>
-                        <button class="text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded font-semibold stylia-btn-secondary">
-                            Ver Looks
-                        </button>
                     </div>
 
                     <!-- Menos Usada (Aleta de Inactividad) -->
@@ -1201,9 +1433,6 @@
                                 <p class="text-xs text-red-500">¡Solo ${leastUsedItem.uses} uso! Inactiva.</p>
                             </div>
                         </div>
-                        <button class="text-xs text-stylia-pink border border-stylia-pink/50 bg-stylia-pink/5 p-1 rounded font-semibold stylia-btn-secondary">
-                            Sugerir Look
-                        </button>
                     </div>
                 </section>
             `;
@@ -1213,28 +1442,43 @@
         function renderCompraModule() {
             // Módulo de Compra del Armario STYLIA y Onboarding (Atracción)
             const compraContent = `
-                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Comprar prendas de ropa 🛍️</h2>
+<h2 class="text-2xl font-bold mb-4 text-black">Comprar prendas de ropa 🛍️</h2>
 
-                <section class="stylia-card p-5 space-y-4">
-                    <p class="text-sm text-gray-600">En base a tus looks más usados, te recomendamos:</p>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <!-- Producto 1 -->
-                        <div class="stylia-card p-3 shadow-md">
-                            <img src="https://placehold.co/200x200/4CAF50/ffffff?text=Falda+Plisada" class="w-full h-32 object-cover rounded-xl mb-2">
-                            <p class="text-sm font-semibold truncate">Falda Plisada Verde</p>
-                            <p class="text-xs text-stylia-pink font-bold">49.99 €</p>
-                            <button class="w-full text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded-full mt-2 stylia-btn-secondary">Añadir al Carrito</button>
-                        </div>
-                        <!-- Producto 2 -->
-                        <div class="stylia-card p-3 shadow-md">
-                            <img src="https://placehold.co/200x200/9b59b6/ffffff?text=Jersey+Cashmere" class="w-full h-32 object-cover rounded-xl mb-2">
-                            <p class="text-sm font-semibold truncate">Jersey Cashmere Malva</p>
-                            <p class="text-xs text-stylia-pink font-bold">79.50 €</p>
-                            <button class="w-full text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded-full mt-2 stylia-btn-secondary">Añadir al Carrito</button>
-                        </div>
-                    </div>
-                </section>
+<section class="stylia-card p-5 space-y-4">
+    <p class="text-sm text-black-600">En base a tus looks más usados, te recomendamos:</p>
+    
+    <div class="grid grid-cols-2 gap-4">
+        
+        <div class="stylia-card p-3 shadow-md">
+            <img src="https://github.com/RA8155/STYLIA/blob/main/Vestido%20midi%20negro.png?raw=true" class="w-full h-32 object-cover rounded-xl mb-2">
+            <p class="text-sm font-semibold truncate">Vestido midi</p>
+            <p class="text-xs text-stylia-pink font-bold">49.99 €</p>
+            <button class="w-full text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded-full mt-2 stylia-btn-secondary">Añadir al Carrito</button>
+        </div>
+
+        <div class="stylia-card p-3 shadow-md">
+            <img src="https://github.com/RA8155/STYLIA/blob/main/Camisa%20azul.png?raw=true" class="w-full h-32 object-cover rounded-xl mb-2">
+            <p class="text-sm font-semibold truncate">Camisa azul</p>
+            <p class="text-xs text-stylia-pink font-bold">25.50 €</p>
+            <button class="w-full text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded-full mt-2 stylia-btn-secondary">Añadir al Carrito</button>
+        </div>
+
+        <div class="stylia-card p-3 shadow-md">
+            <img src="https://github.com/RA8155/STYLIA/blob/main/C%C3%A1rdigan%20de%20punto.png?raw=true" class="w-full h-32 object-cover rounded-xl mb-2">
+            <p class="text-sm font-semibold truncate">Cárdigan</p>
+            <p class="text-xs text-stylia-pink font-bold">35.90 €</p>
+            <button class="w-full text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded-full mt-2 stylia-btn-secondary">Añadir al Carrito</button>
+        </div>
+
+        <div class="stylia-card p-3 shadow-md">
+            <img src="https://github.com/RA8155/STYLIA/blob/main/Jersey.png?raw=true" class="w-full h-32 object-cover rounded-xl mb-2">
+            <p class="text-sm font-semibold truncate">Jersey</p>
+            <p class="text-xs text-stylia-pink font-bold">49.95 €</p>
+            <button class="w-full text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded-full mt-2 stylia-btn-secondary">Añadir al Carrito</button>
+        </div>
+        
+        </div> 
+    </section>
             `;
             return compraContent;
         }
@@ -1244,19 +1488,33 @@
             // Se mantiene simple, sin contador de no leídos.
 
             const notifContent = `
-                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Alertas y Notificaciones</h2>
+                <h2 class="text-2xl font-bold mb-4 text-stylia-black">Alertas y Notificaciones</h2>
+
+                <!-- Botón Marcar Todo Leído (Condicional) -->
+                ${unreadCount > 0 ? `
+                    <button onclick="markAllAsRead()" class="w-full text-sm font-semibold text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-2 rounded-lg mb-4 stylia-btn-secondary">
+                        Marcar todas como leído (${unreadCount})
+                    </button>
+                ` : `
+                    <p class="text-sm text-center text-gray-500 mb-4">No tienes notificaciones sin leer.</p>
+                `}
 
                 <div class="space-y-3">
-                    ${mockNotifications.map(notif => `
-                        <div class="stylia-card p-4 flex items-start space-x-3 border-l-4 border-gray-200">
-                            <span class="text-2xl pt-1 flex-shrink-0">${notif.icon}</span>
-                            <div>
-                                <p class="text-sm font-bold text-gray-800">${notif.title}</p>
-                                <p class="text-sm text-gray-600">${notif.content}</p>
-                                <p class="text-xs text-gray-400 mt-1">${notif.time}</p>
+                    ${mockNotifications.map(notif => {
+                        // Resaltar visualmente las no leídas
+                        const readClass = notif.isRead ? 'border-gray-200' : 'border-stylia-pink/70 bg-stylia-pink/5';
+                        return `
+                            <div class="stylia-card p-4 flex items-start space-x-3 border-l-4 ${readClass}">
+                                <span class="text-2xl pt-1 flex-shrink-0">${notif.icon}</span>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800">${notif.title}</p>
+                                    <p class="text-sm text-gray-600">${notif.content}</p>
+                                    <p class="text-xs text-gray-400 mt-1">${notif.time}</p>
+                                </div>
+                                ${!notif.isRead ? '<span class="ml-auto text-xs font-bold text-stylia-pink">• Nuevo</span>' : ''}
                             </div>
-                        </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
             `;
             return notifContent;
@@ -1288,11 +1546,11 @@
 
                 <!-- Preferencias y Estilo (USANDO VARIABLES DE ESTADO) -->
                 <section class="stylia-card p-5 mb-6 space-y-3">
-                    <h3 class="text-lg font-bold text-stylia-pink">Mis Preferencias STYLIA</h3>
+                    <h3 class="text-lg font-bold text-stylia-black">Mis Preferencias STYLIA</h3>
                     
                     <div class="flex justify-between items-center border-b pb-2">
                         <p class="font-medium text-gray-700">Estilo Actual Sugerido:</p>
-                        <p class="text-stylia-purple font-semibold">${currentStyle}</p>
+                        <p class="text-stylia-grey font-semibold">${currentStyle}</p>
                     </div>
                     <div class="flex justify-between items-center border-b pb-2">
                         <p class="font-medium text-gray-700">Talla de Camiseta:</p>
@@ -1397,6 +1655,9 @@
 
         // Inicialización: Mostrar el módulo 'look' por defecto al cargar la página
         window.onload = function() {
+            // Inicializar el conteo de notificaciones y la UI de botones
+            updateUnreadCount(); 
+
             // Asegurarse de que la UI es correcta en función del estado inicial
             if(isLoggedIn) {
                 showModule('look');
@@ -1406,4 +1667,3 @@
         };
     </script>
 </body>
-</html>
