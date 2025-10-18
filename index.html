@@ -1,4 +1,4 @@
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -120,7 +120,7 @@
             transition: width 0.5s ease-out;
         }
 
-        /* Estilo para la selección de colores */
+        /* Estilos para la selección de colores */
         .color-option {
             width: 3rem;
             height: 3rem;
@@ -182,12 +182,12 @@
     <div id="app" class="app-container mx-auto max-w-sm border-x border-gray-200 bg-gray-50">
         
         <!-- HEADER FIJO (ORIGINAL) -->
-        <header class="sticky top-0 bg-white border-b border-gray-100 shadow-sm p-4 z-10 flex justify-between items-center">
-            <h1 class="text-xl font-extrabold text-stylia-purple flex items-center">
-                STYLIA <span class="text-xs ml-2 text-gray-500 font-medium"></span>
+        <header id="appHeader" class="sticky top-0 bg-white border-b border-gray-100 shadow-sm p-4 z-10 flex justify-between items-center">
+            <h1 id="headerTitle" class="text-xl font-extrabold text-stylia-purple flex items-center">
+                STYLIA <span id="headerTagline" class="text-xs ml-2 text-gray-500 font-medium"></span>
             </h1>
             <!-- Icono de Notificaciones simple (sin contador) -->
-            <button onclick="showModule('notificaciones')" class="text-2xl text-gray-500">
+            <button id="notificationButton" onclick="showModule('notificaciones')" class="text-2xl text-gray-500">
                 🔔
             </button>
         </header>
@@ -198,7 +198,7 @@
         </main>
 
         <!-- BARRA DE NAVEGACIÓN INFERIOR FIJA (6 elementos) -->
-        <nav class="fixed bottom-0 left-0 right-0 mx-auto max-w-sm h-16 bg-white border-t border-gray-200 shadow-lg flex justify-around items-center z-20">
+        <nav id="bottomNav" class="fixed bottom-0 left-0 right-0 mx-auto max-w-sm h-16 bg-white border-t border-gray-200 shadow-lg flex justify-around items-center z-20">
             <!-- Todos los botones ahora usan w-1/6 (approx.) -->
             <button onclick="showModule('look')" id="nav-look" class="flex flex-col items-center justify-center h-full w-[16.6%] text-gray-500 transition duration-150 ease-in-out nav-button">
                 <span class="text-2xl">✨</span>
@@ -319,6 +319,9 @@
 
         // --- ESTADO DEL MÓDULO ARMARIO (Nuevo) ---
         let currentArmarioFilter = 'Todo'; 
+        
+        // --- ESTADO DE AUTENTICACIÓN (NUEVO) ---
+        let isLoggedIn = true; // Asumimos que el usuario está logueado al inicio
 
         // --- OPCIONES PARA EL MODAL DE PREFERENCIAS ---
         const styleOptions = ['Casual Chic', 'Minimalista', 'Deportivo', 'Bohemio', 'Elegante', 'Urbano'];
@@ -361,6 +364,8 @@
             if (isError) {
                 toast.classList.add('bg-red-500'); // Fondo rojo para errores
             } else {
+                // Quita clases de error si estaban
+                toast.classList.remove('bg-red-500');
                 toast.classList.add('bg-stylia-purple'); // Fondo por defecto
             }
 
@@ -415,6 +420,36 @@
             }
         }
         
+        // --- Utilidades para la UI (Header/Nav) ---
+        const appHeader = document.querySelector('header');
+        const headerTitle = appHeader.querySelector('h1');
+        const notificationButton = appHeader.querySelector('button');
+        const bottomNav = document.querySelector('nav');
+        
+        // --- LÓGICA DE AUTENTICACIÓN (NUEVO) ---
+        function handleLogout() {
+            isLoggedIn = false;
+            showToast('Sesión cerrada. ¡Vuelve pronto!');
+            // Ocultar barra de navegación
+            bottomNav.classList.add('hidden');
+            // Ajustar el encabezado
+            headerTitle.innerHTML = 'STYLIA'; // Quitar el tagline
+            notificationButton.classList.add('hidden');
+            // Forzar la vista a la pantalla de autenticación
+            showModule('auth');
+        }
+
+        function handleLoginOrRegister() {
+            isLoggedIn = true;
+            showToast('¡Bienvenido de nuevo, Mónica!');
+            // Restaurar la interfaz de usuario
+            bottomNav.classList.remove('hidden');
+            headerTitle.innerHTML = 'STYLIA <span class="text-xs ml-2 text-gray-500 font-medium"></span>';
+            notificationButton.classList.remove('hidden');
+            // Volver a la vista predeterminada
+            showModule('look'); 
+        }
+
         // --- LÓGICA DE LA APP Y MÓDULOS EXISTENTES ---
         const contentDiv = document.getElementById('content');
         const navButtons = {
@@ -889,6 +924,49 @@
                 </button>
             `;
         }
+        
+        // --- RENDERIZADO DEL MÓDULO DE AUTENTICACIÓN (NUEVO) ---
+        function renderAuthModule() {
+            // Pantalla de autenticación: Imagen de bienvenida y botones de acción.
+            const authContent = `
+                <div class="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-4 text-center bg-gray-50">
+                    
+                    <h2 class="text-4xl font-extrabold text-stylia-purple mb-4 animate-pulse">
+                        👋 STYLIA
+                    </h2>
+
+                    <!-- Imagen grande y estilizada (simulación de banner) -->
+                    <div class="stylia-card w-full p-4 mb-8 bg-white border-2 border-stylia-purple/50">
+                        <img src="https://placehold.co/400x200/8a2be2/ffffff?text=Tu+Estilista+Personal+IA" 
+                            alt="Ilustración de Bienvenida" class="w-full rounded-xl object-cover shadow-lg">
+                    </div>
+
+                    <p class="text-xl font-semibold text-gray-800 mb-6">
+                        Descubre tu próximo look perfecto.
+                    </p>
+                    
+                    <div class="w-full space-y-4 max-w-xs">
+                        <!-- Botón Iniciar Sesión (Primario) -->
+                        <button onclick="handleLoginOrRegister()" 
+                                class="stylia-btn-primary w-full p-3 rounded-full text-lg font-semibold">
+                            Iniciar Sesión
+                        </button>
+                        
+                        <!-- Botón Registrar (Secundario) -->
+                        <button onclick="handleLoginOrRegister()" 
+                                class="w-full p-3 rounded-full text-lg font-semibold border-2 border-stylia-purple text-stylia-purple bg-white hover:bg-stylia-purple/5 transition stylia-btn-secondary">
+                            Registrarme
+                        </button>
+                    </div>
+                    
+                    <p class="text-xs text-gray-400 mt-10">
+                        Al continuar, aceptas nuestros términos de servicio.
+                    </p>
+                </div>
+            `;
+            return authContent;
+        }
+
 
         // --- RENDERS DE MÓDULOS ---
 
@@ -1246,9 +1324,9 @@
                     </div>
                 </section>
                 
-                <!-- Botón de Cerrar Sesión (Separado) -->
+                <!-- Botón de Cerrar Sesión (Separado) - INTERACTIVO -->
                 <section class="stylia-card p-3">
-                    <button class="w-full text-sm text-red-600 border border-red-300 bg-red-50 p-3 rounded-full stylia-btn-secondary">
+                    <button onclick="handleLogout()" class="w-full text-sm text-red-600 border border-red-300 bg-red-50 p-3 rounded-full stylia-btn-secondary">
                         Cerrar Sesión
                     </button>
                 </section>
@@ -1259,7 +1337,13 @@
         // --- LÓGICA DE NAVEGACIÓN ---
 
         function showModule(moduleName) {
-            // 1. Desactivar todos los botones y activar el seleccionado
+            
+            // 1. CONTROL DE AUTENTICACIÓN: Si no está logueado, forzar la vista de autenticación.
+            if (!isLoggedIn && moduleName !== 'auth') {
+                return showModule('auth'); 
+            }
+            
+            // 2. Desactivar todos los botones de la barra de navegación y activar el seleccionado
             Object.values(navButtons).forEach(btn => {
                 if (btn) btn.classList.remove('nav-active');
             });
@@ -1268,9 +1352,12 @@
                 activeNav.classList.add('nav-active');
             }
 
-            // 2. Renderizar el contenido
+            // 3. Renderizar el contenido
             let contentHTML = '';
             switch (moduleName) {
+                case 'auth':
+                    contentHTML = renderAuthModule();
+                    break;
                 case 'look':
                     contentHTML = renderLookModule();
                     break;
@@ -1310,7 +1397,12 @@
 
         // Inicialización: Mostrar el módulo 'look' por defecto al cargar la página
         window.onload = function() {
-            showModule('look');
+            // Asegurarse de que la UI es correcta en función del estado inicial
+            if(isLoggedIn) {
+                showModule('look');
+            } else {
+                handleLogout(); // Ir a la pantalla de Auth si no está logueado
+            }
         };
     </script>
 </body>
