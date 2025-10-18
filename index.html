@@ -1,4 +1,4 @@
-<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -119,6 +119,38 @@
             background-color: var(--color-secondary); /* Usa el color rosa para destacar */
             transition: width 0.5s ease-out;
         }
+
+        /* Estilo para la selección de colores */
+        .color-option {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .color-option.selected {
+            border-color: var(--color-primary);
+            transform: scale(1.1);
+        }
+        .color-white {
+            border: 1px solid #ddd;
+        }
+        
+        /* Estilos para los radio buttons de TALLA y ESTILO */
+        /* Estilo seleccionado para Estilo */
+        .style-label-selected {
+            background-color: var(--color-primary) !important;
+            color: white !important;
+            border-color: var(--color-primary) !important;
+        }
+        /* Estilo seleccionado para Talla */
+        .size-label-selected {
+            background-color: var(--color-secondary) !important;
+            color: white !important;
+            border-color: var(--color-secondary) !important;
+        }
     </style>
     <script>
         tailwind.config = {
@@ -149,11 +181,15 @@
     <!-- Contenedor Principal de la App (Simulación de Móvil) -->
     <div id="app" class="app-container mx-auto max-w-sm border-x border-gray-200 bg-gray-50">
         
-        <!-- HEADER FIJO -->
-        <header class="sticky top-0 bg-white border-b border-gray-100 shadow-sm p-4 z-10">
-            <h1 class="text-xl font-extrabold text-stylia-purple flex items-center justify-center">
+        <!-- HEADER FIJO (ORIGINAL) -->
+        <header class="sticky top-0 bg-white border-b border-gray-100 shadow-sm p-4 z-10 flex justify-between items-center">
+            <h1 class="text-xl font-extrabold text-stylia-purple flex items-center">
                 STYLIA <span class="text-xs ml-2 text-gray-500 font-medium"></span>
             </h1>
+            <!-- Icono de Notificaciones simple (sin contador) -->
+            <button onclick="showModule('notificaciones')" class="text-2xl text-gray-500">
+                🔔
+            </button>
         </header>
 
         <!-- CONTENIDO DINÁMICO DE LOS MÓDULOS -->
@@ -192,12 +228,12 @@
 
     </div>
 
-    <!-- Modal para la Función "No Sé Qué Ponerme" y "Ver Detalles" -->
-    <div id="lookModal" class="modal-overlay" onclick="closeModal()">
+    <!-- Modal Principal (Ahora genérico: Look, Detalles, Preferencias) -->
+    <div id="mainModal" class="modal-overlay" onclick="closeModal()">
         <div class="modal-content p-6" onclick="event.stopPropagation()">
             
             <!-- Contenido para el ASESOR DE IA (Existente) -->
-            <div id="ai-advisor-view">
+            <div id="ai-advisor-view" class="hidden">
                 <h3 class="text-xl font-bold text-stylia-purple mb-4 flex items-center">
                     ✨ Asesor de Outfit con IA
                 </h3>
@@ -208,7 +244,7 @@
                             <option value="Camiseta Blanca">Camiseta Blanca (Superior)</option>
                             <option value="Pantalón Jeans Negro">Pantalón Jeans Negro (Inferior)</option>
                             <option value="Chaqueta Vaquera">Chaqueta Vaquera (Exterior)</option>
-                            <option value="Zapatillas Blancas">Zapatillas Blancas (Calzado)</option>
+                            <option value="Sudadera Oversize">Sudadera Oversize (Parte de arriba)</option>
                         </select>
                     </div>
                     <div class="mb-6">
@@ -229,7 +265,7 @@
                 </div>
             </div>
 
-            <!-- Contenido para VER DETALLES DE OUTFIT SIMPLE (Nuevo) -->
+            <!-- Contenido para VER DETALLES DE OUTFIT SIMPLE (Existente) -->
             <div id="simple-details-view" class="hidden">
                 <!-- Título dinámico para el outfit -->
                 <h3 id="simple-details-title" class="text-xl font-bold text-stylia-pink mb-4 flex items-center"></h3>
@@ -255,22 +291,50 @@
                 </button>
             </div>
             
+            <!-- Contenido para EDICIÓN DE PREFERENCIAS (NUEVO) -->
+            <div id="preferences-view" class="hidden">
+                <!-- El contenido del formulario se inyectará aquí -->
+            </div>
+
         </div>
     </div>
 
 
     <script>
         // --- CONSTANTES Y UTILIDADES DE GEMINI API ---
-        const API_KEY = "AIzaSyC8kVl1MKzNazA83iFtvcaCFcQJOZb_DP0";
+        const API_KEY = "";
         
         // Configuración para Generación de Texto (Asesor)
         const TEXT_MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
         const TEXT_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL_NAME}:generateContent?key=${API_KEY}`;
         
-        // Configuración para Generación de Imágenes (Detalles) - COMENTADO PARA USAR IMÁGENES ESTÁTICAS
-        // const IMAGE_MODEL_NAME = "imagen-3.0-generate-002";
-        // const IMAGE_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL_NAME}:predict?key=${API_KEY}`;
-        
+        // --- ESTADO DE LA APLICACIÓN (Variables de Perfil) ---
+        let userName = 'Mónica López';
+        let userEmail = 'monica.lopez@gmail.com';
+        let memberSince = 'Octubre 2025';
+        // Variables de preferencias (interactivas)
+        let currentStyle = 'Casual Chic';
+        let tshirtSize = 'M';
+        let favoriteColors = ['#ff69b4', '#FFFFFF', '#3B82F6']; // Rosa, Blanco, Azul
+
+        // --- ESTADO DEL MÓDULO ARMARIO (Nuevo) ---
+        let currentArmarioFilter = 'Todo'; 
+
+        // --- OPCIONES PARA EL MODAL DE PREFERENCIAS ---
+        const styleOptions = ['Casual Chic', 'Minimalista', 'Deportivo', 'Bohemio', 'Elegante', 'Urbano'];
+        const sizeOptions = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+        const availableColors = [
+            { name: 'Rosa (Stylia)', hex: '#ff69b4' },
+            { name: 'Blanco', hex: '#FFFFFF' },
+            { name: 'Negro', hex: '#1F2937' },
+            { name: 'Rojo', hex: '#EF4444' },
+            { name: 'Azul', hex: '#3B82F6' },
+            { name: 'Verde', hex: '#10B981' },
+            { name: 'Violeta', hex: '#8a2be2' },
+            { name: 'Naranja', hex: '#F97316' },
+        ];
+
+
         // Función para mostrar/ocultar el indicador de carga global
         function showLoading(message = 'Generando sugerencia...') {
             document.getElementById('loading-message').textContent = message;
@@ -291,7 +355,15 @@
             toast.textContent = message;
             
             // Muestra el toast
-            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'bg-red-500');
+            // Determinar si es un mensaje de error o éxito/info
+            const isError = message.includes('⚠️') || message.includes('❌');
+            if (isError) {
+                toast.classList.add('bg-red-500'); // Fondo rojo para errores
+            } else {
+                toast.classList.add('bg-stylia-purple'); // Fondo por defecto
+            }
+
             toast.classList.add('opacity-100');
 
             // Oculta el toast después de 5 segundos (5000ms)
@@ -343,57 +415,6 @@
             }
         }
         
-        /**
-         * Llama a la API de generación de imágenes con backoff exponencial. - FUNCIÓN COMENTADA
-         * @param {string} prompt - La descripción de la imagen a generar.
-         * @returns {string} Base64 data URL de la imagen.
-         */
-        /*
-        async function generateOutfitImage(prompt, retries = 3) {
-            // Añadir la instrucción para asegurar que es una imagen de mujer
-            const finalPrompt = `photo of a woman, professional fashion photography, stylish, wearing: ${prompt}`;
-            
-            const payload = { 
-                instances: [{ prompt: finalPrompt }], 
-                parameters: { "sampleCount": 1 } 
-            };
-
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(IMAGE_API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.status === 429 && i < retries - 1) {
-                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        continue;
-                    }
-
-                    if (!response.ok) {
-                        throw new Error(`Image API call failed with status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    const base64Data = result.predictions?.[0]?.bytesBase64Encoded;
-
-                    if (base64Data) {
-                        return `data:image/png;base64,${base64Data}`;
-                    } else {
-                        throw new Error('No image generated by the model.');
-                    }
-
-                } catch (error) {
-                    console.error('Imagen API Error:', error);
-                    if (i === retries - 1) throw error; // Re-throw error after last retry
-                }
-            }
-        }
-        */
-
-
         // --- LÓGICA DE LA APP Y MÓDULOS EXISTENTES ---
         const contentDiv = document.getElementById('content');
         const navButtons = {
@@ -406,12 +427,14 @@
         };
 
         // --- Datos de Ejemplo (Mock Data) ---
+        // MODIFICACIÓN: Se añade el campo 'category' para permitir el filtrado granular.
         const mockInventory = [
-            { id: 1, name: 'Camiseta Blanca', type: 'Superior', color: 'Blanco', uses: 15, lastUsed: 'Ayer', needsWash: true, imageUrl: 'https://placehold.co/100x100/eeeeee/333333?text=T-Shirt' },
-            { id: 2, name: 'Pantalón Jeans Negro', type: 'Inferior', color: 'Negro', material: 'Denim', uses: 12, lastUsed: 'Hace 3 días', needsWash: false, imageUrl: 'https://placehold.co/100x100/444444/ffffff?text=Jeans' },
-            { id: 3, name: 'Chaqueta Vaquera', type: 'Exterior', color: 'Azul Denim', material: 'Denim', uses: 2, lastUsed: 'Hace 4 meses', needsWash: false, imageUrl: 'https://placehold.co/100x100/5c7b9e/ffffff?text=Denim+Jacket' },
-            { id: 4, name: 'Zapatillas Blancas', type: 'Calzado', color: 'Blanco', material: 'Piel Sintética', uses: 20, lastUsed: 'Ayer', needsWash: false, imageUrl: 'https://placehold.co/100x100/cccccc/333333?text=Sneakers' },
-            { id: 5, name: 'Blusa de Seda Roja', type: 'Superior', color: 'Rojo', uses: 1, lastUsed: 'Hace 6 meses', needsWash: false, imageUrl: 'https://placehold.co/100x100/a30000/ffffff?text=Blouse' },
+            { id: 1, name: 'Camiseta Blanca', type: 'Superior', category: 'Camisetas y Blusas', color: 'Blanco', uses: 15, lastUsed: 'Ayer', needsWash: true, imageUrl: 'https://placehold.co/100x100/eeeeee/333333?text=T-Shirt' },
+            { id: 2, name: 'Pantalón Jeans Negro', type: 'Inferior', category: 'Pantalones y Faldas', color: 'Negro', material: 'Denim', uses: 12, lastUsed: 'Hace 3 días', needsWash: false, imageUrl: 'https://placehold.co/100x100/444444/ffffff?text=Jeans' },
+            { id: 3, name: 'Chaqueta Vaquera', type: 'Exterior', category: 'Abrigos y Chaquetas', color: 'Azul Denim', material: 'Denim', uses: 2, lastUsed: 'Hace 4 meses', needsWash: false, imageUrl: 'https://placehold.co/100x100/5c7b9e/ffffff?text=Denim+Jacket' },
+            // Se transforma la Camiseta Oversize a una Sudadera para demostrar el filtro
+            { id: 4, name: 'Sudadera Oversize', type: 'Superior', category: 'Sudaderas', color: 'Gris', material: 'Algodón', uses: 20, lastUsed: 'Ayer', needsWash: false, imageUrl: 'https://placehold.co/100x100/cccccc/333333?text=Hoodie' }, 
+            { id: 5, name: 'Blusa de Seda Roja', type: 'Superior', category: 'Camisetas y Blusas', color: 'Rojo', uses: 1, lastUsed: 'Hace 6 meses', needsWash: false, imageUrl: 'https://placehold.co/100x100/a30000/ffffff?text=Blouse' },
         ];
         
         // Transforma el inventario en un string para el prompt de IA
@@ -419,12 +442,12 @@
             `ID ${item.id}: ${item.name} (${item.type}, Color: ${item.color}, Usos: ${item.uses}${item.material ? ', Material: ' + item.material : ''}, Último Uso: ${item.lastUsed})`
         ).join('\n');
 
-
+        // Datos de notificaciones originales (sin el estado 'unread')
         const mockNotifications = [
-            { type: 'look', icon: '✨', title: 'Look del Día y Clima', content: '¡Buenos días! El pronóstico es de 25°C y sol. Te sugerimos este look casual.', time: 'Hace 5 min' },
-            { type: 'maint', icon: '🧺', title: 'Recordatorio de Mantenimiento', content: 'Tu Camiseta Blanca ya se ha usado 3 veces. Es hora de llevarla a lavar.', time: 'Hace 1 hora' },
-            { type: 'offer', icon: '🏷️', title: 'Oferta Personalizada (-20%)', content: '¡Tu color favorito! La chaqueta negra que viste en ASOS ahora tiene un -20% en tu talla. ¡Compra rápida!', time: 'Ayer' },
-            { type: 'alert', icon: '🚨', title: 'Alerta de Inventario', content: 'Parece que no has usado tu Chaqueta Vaquera en 4 meses. ¡Te mostramos 3 looks!', time: 'Hace 2 días' },
+            { type: 'look', icon: '✨', title: 'Tiempo de hoy', content: 'El pronóstico es de 25°C y sol.', time: 'Hace 5 min' },
+            { type: 'maint', icon: '🧺', title: 'Recordatorio de Mantenimiento', content: 'Tu Camiseta Blanca ya se ha usado 3 veces. Es hora de lavarla.', time: 'Hace 1 hora' },
+            { type: 'offer', icon: '🏷️', title: 'Oferta Personalizada (-20%)', content: 'La chaqueta negra que viste en ASOS ahora tiene un descuento del 20% en tu talla.', time: 'Ayer' },
+            { type: 'alert', icon: '🚨', title: 'Alerta de Inventario', content: 'Parece que no has usado tu Chaqueta Vaquera en 4 meses.', time: 'Hace 2 días' },
         ];
         
         // --- Datos y Lógica Específica del Módulo LOOK ---
@@ -441,7 +464,6 @@
         let currentEvent = eventOptions[0].value; // Evento seleccionado por defecto
         
         // --- Nuevos Outfits de Fallback para la sección "Ayuda" (AHORA CON IMAGEN ESTÁTICA) ---
-        // Se añaden las URLs estáticas para reemplazar la generación en tiempo real.
         const fallbackOutfits = [
             { 
                 id: 1, 
@@ -482,37 +504,44 @@
         ];
 
 
-        // --- Funciones del Modal ---
+        // --- Funciones del Modal Genérico ---
         /**
-         * Abre el modal y establece el modo de vista (IA o Detalles Simples).
-         * @param {string} mode - 'ai' o 'details'
+         * Abre el modal y establece el modo de vista (AI, Detalles Simples, o Preferencias).
+         * @param {string} mode - 'ai', 'details', o 'preferences'
          */
-        function openLookModal(mode = 'ai') {
-            document.getElementById('lookModal').style.display = 'flex';
+        function openMainModal(mode = 'ai') {
+            document.getElementById('mainModal').style.display = 'flex';
             
             const aiView = document.getElementById('ai-advisor-view');
             const simpleView = document.getElementById('simple-details-view');
+            const preferencesView = document.getElementById('preferences-view');
+
+            // Ocultar todas las vistas
+            aiView.classList.add('hidden');
+            simpleView.classList.add('hidden');
+            preferencesView.classList.add('hidden');
 
             if (mode === 'ai') {
-                // Modo AI: Muestra el formulario, oculta el resultado y oculta la vista simple
                 aiView.classList.remove('hidden');
-                simpleView.classList.add('hidden');
                 document.getElementById('look-form').classList.remove('hidden');
                 document.getElementById('look-result').classList.add('hidden');
             } else if (mode === 'details') {
-                // Modo Detalles Simples: Oculta la vista AI y muestra la vista simple
-                aiView.classList.add('hidden');
                 simpleView.classList.remove('hidden');
+            } else if (mode === 'preferences') {
+                preferencesView.classList.remove('hidden');
+                // Inyectar el formulario de preferencias
+                preferencesView.innerHTML = renderPreferencesForm();
+                // Inicializar la selección de colores después de renderizar el HTML
+                setTimeout(initializeColorSelection, 0); 
             }
         }
 
         function closeModal() {
-            document.getElementById('lookModal').style.display = 'none';
+            document.getElementById('mainModal').style.display = 'none';
         }
 
         /**
          * Muestra los detalles de un outfit simple (con imagen ESTÁTICA) en el modal.
-         * Se ha modificado para cargar la URL de imagen estática en lugar de generar con IA.
          * @param {number} outfitId - El ID del outfit en fallbackOutfits.
          */
         function showOutfitDetails(outfitId) {
@@ -536,7 +565,7 @@
             document.getElementById('simple-details-list').innerHTML = itemsHTML;
 
             // 2. Muestra el modal en modo 'details'
-            openLookModal('details');
+            openMainModal('details');
 
             // 3. Carga la imagen estática y actualiza el estado de la UI
             const imageUrl = outfit.staticImageUrl;
@@ -546,9 +575,6 @@
             imgLoading.classList.add('hidden');
             imgError.classList.add('hidden');
             imgElement.classList.remove('hidden'); 
-            
-            // NOTA: Se ha eliminado el bloque try/catch asíncrono y la llamada a generateOutfitImage
-            // para usar la URL estática de forma directa.
         }
 
 
@@ -584,7 +610,7 @@
 
         // --- FUNCIÓN GEMINI: ASISTENTE DE CUIDADO DE PRENDAS (Módulo Armario) ---
         async function askMaintenanceAdvice(item) {
-            const systemPrompt = `Actúa como un asistente de mantenimiento y cuidado de prendas experto. Proporciona consejos específicos de lavado, secado y almacenamiento para la prenda indicada, basándote en su tipo y material (si está disponible). Sé conciso y práctico, usando emojis.`;
+            const systemPrompt = `Actúa como un asistente de mantenimiento y cuidado de prendas experto. Proporciona consejos específicos de lavado, secado y almacenamiento para la prenda indicada, basándose en su tipo y material (si está disponible). Sé conciso y práctico, usando emojis.`;
             
             const itemDetails = mockInventory.find(i => i.name === item);
             if (!itemDetails) return; // No debe ocurrir con la lógica actual
@@ -604,6 +630,20 @@
                 console.error("Error en la generación del consejo:", error);
             }
         }
+        
+        // --- LÓGICA ESPECÍFICA DEL MÓDULO ARMARIO (Nuevo Filtro) ---
+        /**
+         * Actualiza el filtro del armario y re-renderiza el módulo.
+         * @param {string} filter - Las categorías: 'Todo', 'Camisetas y Blusas', 'Sudaderas', 'Pantalones y Faldas', 'Abrigos y Chaquetas', 'Necesita Lavado'.
+         */
+        function filterArmario(filter) {
+            // Solo re-renderiza si el filtro ha cambiado
+            if (currentArmarioFilter !== filter) {
+                currentArmarioFilter = filter;
+                showModule('armario'); 
+            }
+        }
+
         
         // --- FUNCIONES DINÁMICAS DEL MÓDULO LOOK ---
         
@@ -642,7 +682,7 @@
                 </button>
 
                 <!-- Texto Secundario (Llamada al Modal No Sé Qué Ponerme) -->
-                <button onclick="openLookModal('ai')" class="w-full text-sm font-semibold text-stylia-purple/80 hover:text-stylia-purple transition stylia-btn-secondary p-1">
+                <button onclick="openMainModal('ai')" class="w-full text-sm font-semibold text-stylia-purple/80 hover:text-stylia-purple transition stylia-btn-secondary p-1">
                 </button>
             `;
         }
@@ -663,6 +703,192 @@
             document.getElementById('selectedEventLabel').textContent = eventLabel;
         }
 
+        // --- FUNCIONES DEL MODAL DE PREFERENCIAS (NUEVAS) ---
+
+        /**
+         * Abre el modal para editar las preferencias del usuario.
+         */
+        function openPreferencesModal() {
+            openMainModal('preferences');
+        }
+
+        /**
+         * Alterna la selección de un color en el modal de preferencias, con límite de 3.
+         * @param {HTMLElement} element - El elemento del color clicado.
+         */
+        function toggleColorSelection(element) {
+            const isCurrentlySelected = element.classList.contains('selected');
+            const selectedCount = document.querySelectorAll('#preferences-view .color-option.selected').length;
+
+            if (isCurrentlySelected) {
+                // Si ya está seleccionado, lo deselecciona
+                element.classList.remove('selected');
+            } else {
+                // Si no está seleccionado, verifica el límite
+                if (selectedCount >= 3) {
+                    showToast('❌ Solo puedes seleccionar un máximo de 3 colores favoritos.');
+                    return; // No permite la selección
+                }
+                // Si no se supera el límite, selecciona
+                element.classList.add('selected');
+            }
+        }
+        
+        /**
+         * Función para manejar la selección de radio buttons (Estilo/Talla)
+         * para aplicar las clases de color inmediatamente.
+         * @param {string} groupName - 'styleOption' o 'sizeOption'.
+         * @param {HTMLElement} targetLabel - La etiqueta del elemento radio seleccionado.
+         */
+        function handleRadioSelection(groupName, targetLabel) {
+            // 1. Quitar la clase de seleccionado a todos los radios del grupo
+            const allLabels = document.querySelectorAll(`input[name="${groupName}"]`);
+            allLabels.forEach(input => {
+                const label = input.closest('label');
+                if (label) {
+                    label.classList.remove('style-label-selected', 'size-label-selected');
+                }
+            });
+
+            // 2. Añadir la clase de seleccionado al elemento clicado
+            if (groupName === 'styleOption') {
+                targetLabel.classList.add('style-label-selected');
+            } else if (groupName === 'sizeOption') {
+                targetLabel.classList.add('size-label-selected');
+            }
+        }
+
+        /**
+         * Inicializa la selección visual de colores y radios en el formulario.
+         */
+        function initializeColorSelection() {
+            // Inicializa la selección de colores (borde)
+            const colorElements = document.querySelectorAll('#preferences-view .color-option');
+            colorElements.forEach(el => {
+                const hex = el.getAttribute('data-hex');
+                if (favoriteColors.includes(hex)) {
+                    el.classList.add('selected');
+                }
+            });
+
+            // Inicializa la selección de estilos (color de fondo)
+            const styleRadios = document.querySelectorAll('input[name="styleOption"]');
+            styleRadios.forEach(input => {
+                if (input.value === currentStyle) {
+                    input.closest('label').classList.add('style-label-selected');
+                }
+            });
+
+            // Inicializa la selección de tallas (color de fondo)
+            const sizeRadios = document.querySelectorAll('input[name="sizeOption"]');
+            sizeRadios.forEach(input => {
+                if (input.value === tshirtSize) {
+                    input.closest('label').classList.add('size-label-selected');
+                }
+            });
+        }
+
+        /**
+         * Guarda las preferencias seleccionadas en el estado global y recarga el módulo Perfil.
+         */
+        function savePreferences() {
+            // 1. Obtener Estilo
+            const selectedStyle = document.querySelector('input[name="styleOption"]:checked');
+            if (selectedStyle) {
+                currentStyle = selectedStyle.value;
+            }
+
+            // 2. Obtener Talla
+            const selectedSize = document.querySelector('input[name="sizeOption"]:checked');
+            if (selectedSize) {
+                tshirtSize = selectedSize.value;
+            }
+
+            // 3. Obtener Colores Favoritos
+            const selectedColors = Array.from(document.querySelectorAll('#preferences-view .color-option.selected'))
+                                       .map(el => el.getAttribute('data-hex'));
+            favoriteColors = selectedColors;
+
+            // 4. Cerrar Modal y Recargar Módulo Perfil
+            closeModal();
+            showModule('perfil');
+            showToast('✅ ¡Preferencias actualizadas con éxito!');
+        }
+
+        /**
+         * Renderiza el formulario de edición de preferencias.
+         * @returns {string} HTML del formulario.
+         */
+        function renderPreferencesForm() {
+            // Estilos
+            const styleOptionsHTML = styleOptions.map(style => `
+                <label 
+                    class="inline-flex items-center m-1 p-2 rounded-full cursor-pointer transition border border-gray-300 bg-gray-100 text-gray-700 hover:bg-stylia-purple/10"
+                    onclick="handleRadioSelection('styleOption', this)"
+                >
+                    <input type="radio" name="styleOption" value="${style}" class="sr-only" ${currentStyle === style ? 'checked' : ''}>
+                    <span class="text-sm font-medium">${style}</span>
+                </label>
+            `).join('');
+
+            // Tallas
+            const sizeOptionsHTML = sizeOptions.map(size => `
+                <label 
+                    class="inline-flex items-center m-1 p-2 w-10 h-10 rounded-full justify-center cursor-pointer transition border border-gray-300 bg-gray-100 text-gray-700 hover:bg-stylia-pink/10"
+                    onclick="handleRadioSelection('sizeOption', this)"
+                >
+                    <input type="radio" name="sizeOption" value="${size}" class="sr-only" ${tshirtSize === size ? 'checked' : ''}>
+                    <span class="text-sm font-bold">${size}</span>
+                </label>
+            `).join('');
+
+            // Colores
+            const colorOptionsHTML = availableColors.map(color => `
+                <div 
+                    class="color-option ${color.hex === '#FFFFFF' ? 'color-white' : ''}" 
+                    style="background-color: ${color.hex};" 
+                    data-hex="${color.hex}"
+                    onclick="toggleColorSelection(this)"
+                ></div>
+            `).join('');
+
+
+            return `
+                <h3 class="text-2xl font-bold text-stylia-purple mb-6 text-center">
+                    ✏️ Editar Preferencias
+                </h3>
+
+                <!-- SECCIÓN ESTILO -->
+                <div class="mb-6">
+                    <label class="block text-base font-semibold text-gray-800 mb-3">Estilo Actual:</label>
+                    <div class="flex flex-wrap">
+                        ${styleOptionsHTML}
+                    </div>
+                </div>
+
+                <!-- SECCIÓN TALLA -->
+                <div class="mb-6 border-t pt-4 border-gray-100">
+                    <label class="block text-base font-semibold text-gray-800 mb-3">Talla de Camiseta (Top):</label>
+                    <div class="flex flex-wrap space-x-1 justify-center">
+                        ${sizeOptionsHTML}
+                    </div>
+                </div>
+
+                <!-- SECCIÓN COLORES -->
+                <div class="mb-6 border-t pt-4 border-gray-100">
+                    <label class="block text-base font-semibold text-gray-800 mb-3">Colores Favoritos (Máx. 3):</label>
+                    <p class="text-xs text-gray-500 mb-4">Selecciona hasta 3 colores para looks personalizados.</p>
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        ${colorOptionsHTML}
+                    </div>
+                </div>
+
+                <!-- Botón de Guardar -->
+                <button onclick="savePreferences()" class="stylia-btn-primary w-full p-3 rounded-full text-lg font-semibold mt-4">
+                    Guardar Cambios
+                </button>
+            `;
+        }
 
         // --- RENDERS DE MÓDULOS ---
 
@@ -754,18 +980,42 @@
         }
 
         function renderArmarioModule() {
+            // Lógica de filtrado de inventario
+            let filteredInventory = mockInventory;
+        
+            if (currentArmarioFilter !== 'Todo' && currentArmarioFilter !== 'Necesita Lavado') {
+                // MODIFICACIÓN: Filtra por el nuevo campo 'category'
+                filteredInventory = mockInventory.filter(item => item.category === currentArmarioFilter);
+            } else if (currentArmarioFilter === 'Necesita Lavado') {
+                // Filtra por necesidad de lavado (siempre se mantiene)
+                filteredInventory = mockInventory.filter(item => item.needsWash);
+            }
+            
+            // Función auxiliar para clase activa del botón
+            const getFilterClass = (filterName) => 
+                currentArmarioFilter === filterName ? 
+                'bg-stylia-purple text-white' : 
+                'bg-gray-200 text-gray-700 hover:bg-gray-300';
+            
             // Módulo de Mi Armario Digital (Gestión de Inventario)
             const armarioContent = `
-                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Mi Armario Digital (${mockInventory.length} prendas)</h2>
+                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Mi Armario Digital (${filteredInventory.length} / ${mockInventory.length} prendas)</h2>
 
-                <!-- Filtros y Opciones -->
+                <!-- Filtros y Opciones (INTERACTIVOS - MODIFICACIÓN DE BOTONES) -->
                 <div class="flex space-x-2 overflow-x-auto pb-3 mb-4">
                     <!-- Botones de filtro -->
-                    <button class="bg-stylia-purple text-white px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Todo</button>
-                    <button class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Superior</button>
-                    <button class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Inferior</button>
-                    <button class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Exterior</button>
-                    <button class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Necesita Lavado</button>
+                    <button onclick="filterArmario('Todo')" 
+                            class="${getFilterClass('Todo')} px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Todo</button>
+                    <button onclick="filterArmario('Camisetas y Blusas')" 
+                            class="${getFilterClass('Camisetas y Blusas')} px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Camisetas y Blusas</button>
+                    <button onclick="filterArmario('Sudaderas')" 
+                            class="${getFilterClass('Sudaderas')} px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Sudaderas</button>
+                    <button onclick="filterArmario('Pantalones y Faldas')" 
+                            class="${getFilterClass('Pantalones y Faldas')} px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Pantalones y Faldas</button>
+                    <button onclick="filterArmario('Abrigos y Chaquetas')" 
+                            class="${getFilterClass('Abrigos y Chaquetas')} px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Abrigos y Chaquetas</button>
+                    <button onclick="filterArmario('Necesita Lavado')" 
+                            class="${getFilterClass('Necesita Lavado')} px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">⚠️ ¡A Lavar!</button>
                 </div>
 
                 <!-- Galería de Prendas -->
@@ -775,7 +1025,11 @@
                         <span class="mr-2">🔄</span>
                         Sincronizado: Última actualización hace 5 segundos.
                     </div>
-                    ${mockInventory.map(item => `
+                    ${filteredInventory.length === 0 ? 
+                        `<div class="text-center p-6 bg-white rounded-xl shadow-md text-gray-500">
+                            No hay prendas en la categoría seleccionada.
+                        </div>` :
+                        filteredInventory.map(item => `
                         <div class="stylia-card p-3 flex flex-col">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
@@ -786,7 +1040,6 @@
                                         ${item.needsWash ? '<span class="text-xs font-bold text-stylia-pink">⚠️ ¡A lavar!</span>' : ''}
                                     </div>
                                 </div>
-                                <button class="text-stylia-purple hover:text-stylia-pink text-sm font-medium stylia-btn-secondary">Editar</button>
                             </div>
                             
                             <!-- FUNCIÓN GEMINI: Mantenimiento -->
@@ -813,9 +1066,6 @@
             const utilizationRate = Math.round((totalUses / (mockInventory.length * 50)) * 100); // Tasa de uso basado en un potencial de 50 usos por prenda
             
             const statsContent = `
-                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Analítica de mi Armario 📈</h2>
-                <p class="text-sm text-gray-600 mb-6">Descubre cómo usas tus prendas y optimiza tu estilo.</p>
-
                 <!-- Resumen de Uso General -->
                 <section class="stylia-card p-5 mb-6 space-y-3">
                     <h3 class="text-lg font-bold text-stylia-pink">Resumen Global (Últimos 30 días)</h3>
@@ -885,22 +1135,10 @@
         function renderCompraModule() {
             // Módulo de Compra del Armario STYLIA y Onboarding (Atracción)
             const compraContent = `
-                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Compra tu Armario STYLIA 🛍️</h2>
+                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Comprar prendas de ropa 🛍️</h2>
 
                 <section class="stylia-card p-5 space-y-4">
-                    <h3 class="text-xl font-bold text-gray-800">Visualización de Realidad Aumentada (RA)</h3>
-                    <p class="text-sm text-gray-600">Visualiza cómo se vería el Armario STYLIA en tu hogar o prueba prendas en tu cuerpo.</p>
-                    <div class="ar-view">
-                        <p class="text-lg">Toca para Activar la Cámara AR</p>
-                    </div>
-                    <button class="stylia-btn-primary w-full p-3 rounded-full text-sm font-semibold">
-                        Abrir Cámara AR y Probar Prenda
-                    </button>
-                </section>
-
-                <section class="stylia-card p-5 space-y-4">
-                    <h3 class="text-xl font-bold text-gray-800">Tendencias y Recomendaciones</h3>
-                    <p class="text-sm text-gray-600">Basado en tus looks más usados, te recomendamos:</p>
+                    <p class="text-sm text-gray-600">En base a tus looks más usados, te recomendamos:</p>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <!-- Producto 1 -->
@@ -925,12 +1163,14 @@
 
         function renderNotificacionesModule() {
             // Módulo de Notificaciones y Alertas (Engagement)
+            // Se mantiene simple, sin contador de no leídos.
+
             const notifContent = `
-                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Alertas y Notificaciones (${mockNotifications.length}) 🔔</h2>
+                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Alertas y Notificaciones</h2>
 
                 <div class="space-y-3">
                     ${mockNotifications.map(notif => `
-                        <div class="stylia-card p-4 flex items-start space-x-3 border-l-4 ${notif.type === 'alert' ? 'border-red-500' : (notif.type === 'offer' ? 'border-stylia-pink' : 'border-stylia-purple')}">
+                        <div class="stylia-card p-4 flex items-start space-x-3 border-l-4 border-gray-200">
                             <span class="text-2xl pt-1 flex-shrink-0">${notif.icon}</span>
                             <div>
                                 <p class="text-sm font-bold text-gray-800">${notif.title}</p>
@@ -940,28 +1180,26 @@
                         </div>
                     `).join('')}
                 </div>
-
-                <button class="stylia-btn-secondary w-full text-stylia-purple p-3 rounded-full text-sm font-semibold border border-gray-300 bg-white mt-6">
-                    Marcar todo como leído
-                </button>
             `;
             return notifContent;
         }
 
         function renderPerfilModule() {
-            // Módulo de Perfil y Configuración (Personalización)
-            const userName = 'Ana López';
-            const userEmail = 'ana.lopez@email.com';
-            const memberSince = 'Enero 2024';
-            const currentStyle = 'Casual Chic';
+            // Generar los círculos de colores
+            const colorCirclesHTML = favoriteColors.map(hex => {
+                // Encontrar el nombre del color para accesibilidad
+                const colorName = availableColors.find(c => c.hex === hex)?.name || hex;
+                const borderClass = hex === '#FFFFFF' ? 'border border-gray-300' : '';
+                return `<span title="${colorName}" class="w-4 h-4 rounded-full" style="background-color: ${hex}; ${borderClass}"></span>`;
+            }).join('');
 
+            // Módulo de Perfil y Configuración (Personalización)
             const perfilContent = `
-                <h2 class="text-2xl font-bold mb-6 text-stylia-purple">Mi Perfil y Configuración 👤</h2>
 
                 <!-- Tarjeta de Usuario -->
                 <section class="stylia-card p-6 mb-6 flex items-center space-x-4">
                     <div class="w-16 h-16 bg-stylia-pink rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg">
-                        A
+                        ${userName.charAt(0)}
                     </div>
                     <div>
                         <p class="text-xl font-bold text-gray-800">${userName}</p>
@@ -970,7 +1208,7 @@
                     </div>
                 </section>
 
-                <!-- Preferencias y Estilo -->
+                <!-- Preferencias y Estilo (USANDO VARIABLES DE ESTADO) -->
                 <section class="stylia-card p-5 mb-6 space-y-3">
                     <h3 class="text-lg font-bold text-stylia-pink">Mis Preferencias STYLIA</h3>
                     
@@ -980,24 +1218,22 @@
                     </div>
                     <div class="flex justify-between items-center border-b pb-2">
                         <p class="font-medium text-gray-700">Talla de Camiseta:</p>
-                        <p class="text-gray-600">M</p>
+                        <p class="text-gray-600">${tshirtSize}</p>
                     </div>
                     <div class="flex justify-between items-center">
-                        <p class="font-medium text-gray-700">Colores Favoritos:</p>
+                        <p class="font-medium text-gray-700">Colores Favoritos (${favoriteColors.length}):</p>
                         <div class="flex space-x-1">
-                            <span class="w-4 h-4 rounded-full bg-blue-500 border border-gray-300"></span>
-                            <span class="w-4 h-4 rounded-full bg-green-500 border border-gray-300"></span>
-                            <span class="w-4 h-4 rounded-full bg-red-500 border border-gray-300"></span>
+                            ${colorCirclesHTML}
                         </div>
                     </div>
 
-                    <button class="w-full text-xs text-gray-600 border border-gray-300 bg-gray-50 p-2 rounded-lg mt-3 stylia-btn-secondary">
+                    <button onclick="openPreferencesModal()" class="w-full text-xs text-gray-600 border border-gray-300 bg-gray-50 p-2 rounded-lg mt-3 stylia-btn-secondary">
                         Editar Preferencias
                     </button>
                 </section>
 
                 <!-- Configuración de la App -->
-                <section class="stylia-card p-5 space-y-3">
+                <section class="stylia-card p-5 space-y-3 mb-4">
                     <h3 class="text-lg font-bold text-gray-800">Configuración</h3>
                     
                     <div class="flex justify-between items-center">
@@ -1008,8 +1244,11 @@
                             <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-stylia-purple peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-stylia-purple"></div>
                         </label>
                     </div>
-
-                    <button class="w-full text-sm text-red-600 border border-red-300 bg-red-50 p-3 rounded-full mt-3 stylia-btn-secondary">
+                </section>
+                
+                <!-- Botón de Cerrar Sesión (Separado) -->
+                <section class="stylia-card p-3">
+                    <button class="w-full text-sm text-red-600 border border-red-300 bg-red-50 p-3 rounded-full stylia-btn-secondary">
                         Cerrar Sesión
                     </button>
                 </section>
