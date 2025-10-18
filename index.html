@@ -1,0 +1,1044 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STYLIA - M-commerce de Estilo Inteligente</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuración de fuente y modo oscuro */
+        :root {
+            --color-primary: #8a2be2; /* Azul violeta para STYLIA (Blue Violet) */
+            --color-secondary: #ff69b4; /* Rosa brillante (Hot Pink) */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7; /* Fondo ligero */
+        }
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        /* Clase para el botón de navegación activo */
+        .nav-active {
+            color: var(--color-primary);
+            border-top: 2px solid var(--color-primary);
+        }
+        /* Estilos personalizados para la estética STYLIA */
+        .stylia-card {
+            background-color: #ffffff;
+            border-radius: 1.25rem; /* rounded-2xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease;
+        }
+        
+        /* PRIMARY BUTTON STYLES (Gradiente) */
+        .stylia-btn-primary {
+            background-image: linear-gradient(to right, var(--color-primary), #6a1b9a);
+            color: white;
+            border: none;
+            transition: all 0.2s;
+        }
+        .stylia-btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .stylia-btn-primary:active { /* Efecto de presión */
+            transform: scale(0.98);
+            box-shadow: none;
+            opacity: 0.8;
+        }
+
+        /* SECONDARY BUTTON STYLES (Borde o Outline) */
+        .stylia-btn-secondary {
+            transition: all 0.2s;
+            line-height: 1.2; /* Ajuste para evitar CLS en algunos botones */
+        }
+        .stylia-btn-secondary:hover {
+            opacity: 0.9;
+        }
+        .stylia-btn-secondary:active { /* Efecto de presión */
+            transform: scale(0.98);
+            opacity: 0.7;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); /* Sombra de hundimiento sutil */
+        }
+
+        /* NAV BUTTON STYLES */
+        .nav-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Estilo para simular la Realidad Aumentada */
+        .ar-view {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://placehold.co/400x300/4c1d95/ffffff?text=Cámara+AR') center center / cover;
+            min-height: 200px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+            border: 4px solid var(--color-primary);
+        }
+
+        /* Estilos para el Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        /* Barra de progreso simple para estadísticas */
+        .progress-bar-container {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--color-secondary); /* Usa el color rosa para destacar */
+            transition: width 0.5s ease-out;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'stylia-purple': '#8a2be2',
+                        'stylia-pink': '#ff69b4',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Indicador de Carga Global -->
+    <div id="loading-indicator" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-70 text-white p-4 rounded-xl shadow-2xl z-50 hidden flex-col items-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-stylia-pink mb-2"></div>
+        <span id="loading-message" class="text-sm font-semibold">Cargando...</span>
+    </div>
+
+    <!-- Contenedor Principal de la App (Simulación de Móvil) -->
+    <div id="app" class="app-container mx-auto max-w-sm border-x border-gray-200 bg-gray-50">
+        
+        <!-- HEADER FIJO -->
+        <header class="sticky top-0 bg-white border-b border-gray-100 shadow-sm p-4 z-10">
+            <h1 class="text-xl font-extrabold text-stylia-purple flex items-center justify-center">
+                STYLIA <span class="text-xs ml-2 text-gray-500 font-medium"></span>
+            </h1>
+        </header>
+
+        <!-- CONTENIDO DINÁMICO DE LOS MÓDULOS -->
+        <main id="content" class="flex-grow p-4 space-y-4 pb-20 overflow-y-auto">
+            <!-- El contenido de los módulos se inyectará aquí -->
+        </main>
+
+        <!-- BARRA DE NAVEGACIÓN INFERIOR FIJA (6 elementos) -->
+        <nav class="fixed bottom-0 left-0 right-0 mx-auto max-w-sm h-16 bg-white border-t border-gray-200 shadow-lg flex justify-around items-center z-20">
+            <!-- Todos los botones ahora usan w-1/6 (approx.) -->
+            <button onclick="showModule('look')" id="nav-look" class="flex flex-col items-center justify-center h-full w-[16.6%] text-gray-500 transition duration-150 ease-in-out nav-button">
+                <span class="text-2xl">✨</span>
+                <span class="text-xs font-medium mt-0.5">Look</span>
+            </button>
+            <button onclick="showModule('armario')" id="nav-armario" class="flex flex-col items-center justify-center h-full w-[16.6%] text-gray-500 transition duration-150 ease-in-out nav-button">
+                <span class="text-2xl">🗄️</span>
+                <span class="text-xs font-medium mt-0.5">Armario</span>
+            </button>
+            <button onclick="showModule('estadisticas')" id="nav-estadisticas" class="flex flex-col items-center justify-center h-full w-[16.6%] text-gray-500 transition duration-150 ease-in-out nav-button">
+                <span class="text-2xl">📈</span>
+                <span class="text-xs font-medium mt-0.5">Stats</span>
+            </button>
+            <button onclick="showModule('compra')" id="nav-compra" class="flex flex-col items-center justify-center h-full w-[16.6%] text-gray-500 transition duration-150 ease-in-out nav-button">
+                <span class="text-2xl">🛍️</span>
+                <span class="text-xs font-medium mt-0.5">Comprar</span>
+            </button>
+            <button onclick="showModule('notificaciones')" id="nav-notificaciones" class="flex flex-col items-center justify-center h-full w-[16.6%] text-gray-500 transition duration-150 ease-in-out nav-button">
+                <span class="text-2xl">🔔</span>
+                <span class="text-xs font-medium mt-0.5">Alertas</span>
+            </button>
+            <button onclick="showModule('perfil')" id="nav-perfil" class="flex flex-col items-center justify-center h-full w-[16.6%] text-gray-500 transition duration-150 ease-in-out nav-button">
+                <span class="text-2xl">👤</span>
+                <span class="text-xs font-medium mt-0.5">Perfil</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- Modal para la Función "No Sé Qué Ponerme" y "Ver Detalles" -->
+    <div id="lookModal" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-content p-6" onclick="event.stopPropagation()">
+            
+            <!-- Contenido para el ASESOR DE IA (Existente) -->
+            <div id="ai-advisor-view">
+                <h3 class="text-xl font-bold text-stylia-purple mb-4 flex items-center">
+                    ✨ Asesor de Outfit con IA
+                </h3>
+                <div id="look-form">
+                    <div class="mb-4">
+                        <label for="baseItem" class="block text-sm font-medium text-gray-700">Prenda Base:</label>
+                        <select id="baseItem" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-stylia-purple focus:ring focus:ring-stylia-purple focus:ring-opacity-50 p-2 border">
+                            <option value="Camiseta Blanca">Camiseta Blanca (Superior)</option>
+                            <option value="Pantalón Jeans Negro">Pantalón Jeans Negro (Inferior)</option>
+                            <option value="Chaqueta Vaquera">Chaqueta Vaquera (Exterior)</option>
+                            <option value="Zapatillas Blancas">Zapatillas Blancas (Calzado)</option>
+                        </select>
+                    </div>
+                    <div class="mb-6">
+                        <label for="occasion" class="block text-sm font-medium text-gray-700">Ocasión:</label>
+                        <input type="text" id="occasion" placeholder="Ej: Cena de aniversario, día de relax, reunión de trabajo" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-stylia-purple focus:ring focus:ring-stylia-purple focus:ring-opacity-50 p-2 border">
+                    </div>
+                    <button onclick="generateOutfitAdvice()" class="stylia-btn-primary w-full p-3 rounded-full text-sm font-semibold">
+                        Generar Look con IA
+                    </button>
+                </div>
+                
+                <div id="look-result" class="mt-4 hidden">
+                    <h4 class="font-bold text-lg text-stylia-pink mb-2">Look Recomendado:</h4>
+                    <div id="result-text" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap"></div>
+                    <button onclick="closeModal()" class="w-full text-stylia-purple p-3 rounded-full text-sm font-semibold border border-stylia-purple/50 bg-stylia-purple/5 mt-4 stylia-btn-secondary">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenido para VER DETALLES DE OUTFIT SIMPLE (Nuevo) -->
+            <div id="simple-details-view" class="hidden">
+                <!-- Título dinámico para el outfit -->
+                <h3 id="simple-details-title" class="text-xl font-bold text-stylia-pink mb-4 flex items-center"></h3>
+                
+                <!-- Contenedor de Imagen y Carga -->
+                <div id="image-container" class="w-full h-64 bg-gray-200 rounded-xl mb-4 border-2 border-stylia-purple/50 flex items-center justify-center relative">
+                    <img id="simple-details-image" src="" alt="Imagen del Outfit" class="w-full h-full object-cover rounded-xl hidden">
+                    <div id="image-loading" class="flex flex-col items-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-stylia-purple mb-2"></div>
+                        <span class="text-sm text-gray-600 font-semibold">Generando imagen con IA...</span>
+                    </div>
+                    <p id="image-error" class="text-sm text-red-600 font-semibold p-4 text-center hidden">
+                        ⚠️ No se pudo generar la imagen.
+                    </p>
+                </div>
+                
+                <!-- Lista de Prendas -->
+                <div id="simple-details-list" class="p-4 bg-gray-50 rounded-lg mb-4 text-gray-700"></div>
+
+                <!-- Botón de Cierre -->
+                <button onclick="closeModal()" class="w-full stylia-btn-primary p-3 rounded-full text-sm font-semibold">
+                    Entendido
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+
+    <script>
+        // --- CONSTANTES Y UTILIDADES DE GEMINI API ---
+        const API_KEY = "";
+        
+        // Configuración para Generación de Texto (Asesor)
+        const TEXT_MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
+        const TEXT_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL_NAME}:generateContent?key=${API_KEY}`;
+        
+        // Configuración para Generación de Imágenes (Detalles)
+        const IMAGE_MODEL_NAME = "imagen-3.0-generate-002";
+        const IMAGE_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL_NAME}:predict?key=${API_KEY}`;
+        
+        // Función para mostrar/ocultar el indicador de carga global
+        function showLoading(message = 'Generando sugerencia...') {
+            document.getElementById('loading-message').textContent = message;
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            document.getElementById('loading-indicator').classList.add('flex');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-indicator').classList.remove('flex');
+            document.getElementById('loading-indicator').classList.add('hidden');
+        }
+
+        /**
+         * Llama a la API de generación de texto con backoff exponencial.
+         */
+        async function callGeminiApi(userQuery, systemPrompt, retries = 3) {
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(TEXT_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429 && i < retries - 1) {
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) {
+                        return text;
+                    } else {
+                        throw new Error('No content generated by the model.');
+                    }
+
+                } catch (error) {
+                    console.error('Gemini API Error:', error);
+                    if (i === retries - 1) throw error; // Re-throw error after last retry
+                }
+            }
+        }
+        
+        /**
+         * Llama a la API de generación de imágenes con backoff exponencial.
+         * @param {string} prompt - La descripción de la imagen a generar.
+         * @returns {string} Base64 data URL de la imagen.
+         */
+        async function generateOutfitImage(prompt, retries = 3) {
+            // Añadir la instrucción para asegurar que es una imagen de mujer
+            const finalPrompt = `photo of a woman, professional fashion photography, stylish, wearing: ${prompt}`;
+            
+            const payload = { 
+                instances: [{ prompt: finalPrompt }], 
+                parameters: { "sampleCount": 1 } 
+            };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(IMAGE_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429 && i < retries - 1) {
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(`Image API call failed with status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const base64Data = result.predictions?.[0]?.bytesBase64Encoded;
+
+                    if (base64Data) {
+                        return `data:image/png;base64,${base64Data}`;
+                    } else {
+                        throw new Error('No image generated by the model.');
+                    }
+
+                } catch (error) {
+                    console.error('Imagen API Error:', error);
+                    if (i === retries - 1) throw error; // Re-throw error after last retry
+                }
+            }
+        }
+
+
+        // --- LÓGICA DE LA APP Y MÓDULOS EXISTENTES ---
+        const contentDiv = document.getElementById('content');
+        const navButtons = {
+            'look': document.getElementById('nav-look'),
+            'armario': document.getElementById('nav-armario'),
+            'estadisticas': document.getElementById('nav-estadisticas'), 
+            'compra': document.getElementById('nav-compra'),
+            'notificaciones': document.getElementById('nav-notificaciones'),
+            'perfil': document.getElementById('nav-perfil'), 
+        };
+
+        // --- Datos de Ejemplo (Mock Data) ---
+        const mockInventory = [
+            { id: 1, name: 'Camiseta Blanca', type: 'Superior', color: 'Blanco', uses: 15, lastUsed: 'Ayer', needsWash: true, imageUrl: 'https://placehold.co/100x100/eeeeee/333333?text=T-Shirt' },
+            { id: 2, name: 'Pantalón Jeans Negro', type: 'Inferior', color: 'Negro', material: 'Denim', uses: 12, lastUsed: 'Hace 3 días', needsWash: false, imageUrl: 'https://placehold.co/100x100/444444/ffffff?text=Jeans' },
+            { id: 3, name: 'Chaqueta Vaquera', type: 'Exterior', color: 'Azul Denim', material: 'Denim', uses: 2, lastUsed: 'Hace 4 meses', needsWash: false, imageUrl: 'https://placehold.co/100x100/5c7b9e/ffffff?text=Denim+Jacket' },
+            { id: 4, name: 'Zapatillas Blancas', type: 'Calzado', color: 'Blanco', material: 'Piel Sintética', uses: 20, lastUsed: 'Ayer', needsWash: false, imageUrl: 'https://placehold.co/100x100/cccccc/333333?text=Sneakers' },
+            { id: 5, name: 'Blusa de Seda Roja', type: 'Superior', color: 'Rojo', uses: 1, lastUsed: 'Hace 6 meses', needsWash: false, imageUrl: 'https://placehold.co/100x100/a30000/ffffff?text=Blouse' },
+        ];
+        
+        // Transforma el inventario en un string para el prompt de IA
+        const inventoryContext = mockInventory.map(item => 
+            `ID ${item.id}: ${item.name} (${item.type}, Color: ${item.color}, Usos: ${item.uses}${item.material ? ', Material: ' + item.material : ''}, Último Uso: ${item.lastUsed})`
+        ).join('\n');
+
+
+        const mockNotifications = [
+            { type: 'look', icon: '✨', title: 'Look del Día y Clima', content: '¡Buenos días! El pronóstico es de 25°C y sol. Te sugerimos este look casual.', time: 'Hace 5 min' },
+            { type: 'maint', icon: '🧺', title: 'Recordatorio de Mantenimiento', content: 'Tu Camiseta Blanca ya se ha usado 3 veces. Es hora de llevarla a lavar.', time: 'Hace 1 hora' },
+            { type: 'offer', icon: '🏷️', title: 'Oferta Personalizada (-20%)', content: '¡Tu color favorito! La chaqueta negra que viste en ASOS ahora tiene un -20% en tu talla. ¡Compra rápida!', time: 'Ayer' },
+            { type: 'alert', icon: '🚨', title: 'Alerta de Inventario', content: 'Parece que no has usado tu Chaqueta Vaquera en 4 meses. ¡Te mostramos 3 looks!', time: 'Hace 2 días' },
+        ];
+        
+        // --- Datos y Lógica Específica del Módulo LOOK ---
+        const eventOptions = [
+            { value: 'Reunion_Formal', label: 'Reunión 💼', outfitName: 'Traje Ejecutivo Clásico', 
+                items: [{ name: 'Blazer: Gris o gris carbón', detail: '' }, { name: 'Blusa: Blanco roto', detail: '' }, { name: 'Falda: Gris o gris carbón', detail: '' }] },
+            { value: 'Dia_Relax', label: 'Día de Relax 🛋️', outfitName: 'Ropa casual de domingo', 
+                items: [{ name: 'Sudadera Oversize', detail: '' }, { name: 'Joggers Grises', detail: '' }] },
+            { value: 'Cena_Amigos', label: 'Cena 🥂', outfitName: 'Smart-Casual de Noche', 
+                items: [{ name: 'Blusa de Seda Roja', detail: '(Uso: 1)' }, { name: 'Pantalón Negro Skinny', detail: '(Limpio)' }, { name: 'Botines Negros', detail: '(Clásico de Invierno)' }] },
+            { value: 'Gimnasio', label: 'Gimnasio 💪', outfitName: 'Active Wear Funcional', 
+                items: [{ name: 'Top Deportivo Negro', detail: '(Alto Soporte)' }, { name: 'Leggings Transpirables', detail: '(En uso)' }, { name: 'Tenis de Running', detail: '(Máximo Agarre)' }] }
+        ];
+        let currentEvent = eventOptions[0].value; // Evento seleccionado por defecto
+        
+        // --- Nuevos Outfits de Fallback para la sección "Ayuda" (AHORA CON DESCRIPCIONES DETALLADAS PARA LA IA) ---
+        const fallbackOutfits = [
+            { 
+                id: 1, 
+                name: 'Casual de Oficina', 
+                type: 'Formal', 
+                items: ['Blazer negro entallado', 'Camisa blanca de seda', 'Jeans de mezclilla oscura rectos', 'Botines de tacón bajo'], 
+                icon: '💼', 
+                promptDescription: 'a black fitted blazer, a white silk shirt, dark wash straight denim jeans, and low-heeled booties. Modern office setting.' 
+            },
+            { 
+                id: 2, 
+                name: 'Noche de Cóctel', 
+                type: 'Glam', 
+                items: ['Vestido midi ajustado de terciopelo azul', 'Tacones de aguja negros', 'Pendientes colgantes XL de oro'], 
+                icon: '🍸', 
+                promptDescription: 'a fitted blue velvet midi dress, black stiletto heels, and large gold drop earrings. Elegant party background.' 
+            },
+            { 
+                id: 3, 
+                name: 'Fin de Semana Relax', 
+                type: 'Relax', 
+                items: ['Sudadera oversize color beige', 'Joggers deportivos grises', 'Zapatillas deportivas blancas', 'Gorra de béisbol'], 
+                icon: '☕', 
+                promptDescription: 'an oversized beige sweatshirt, grey athletic joggers, white sneakers, and a baseball cap. Cozy home environment.' 
+            },
+        ];
+
+
+        // --- Funciones del Modal ---
+        /**
+         * Abre el modal y establece el modo de vista (IA o Detalles Simples).
+         * @param {string} mode - 'ai' o 'details'
+         */
+        function openLookModal(mode = 'ai') {
+            document.getElementById('lookModal').style.display = 'flex';
+            
+            const aiView = document.getElementById('ai-advisor-view');
+            const simpleView = document.getElementById('simple-details-view');
+
+            if (mode === 'ai') {
+                // Modo AI: Muestra el formulario, oculta el resultado y oculta la vista simple
+                aiView.classList.remove('hidden');
+                simpleView.classList.add('hidden');
+                document.getElementById('look-form').classList.remove('hidden');
+                document.getElementById('look-result').classList.add('hidden');
+            } else if (mode === 'details') {
+                // Modo Detalles Simples: Oculta la vista AI y muestra la vista simple
+                aiView.classList.add('hidden');
+                simpleView.classList.remove('hidden');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('lookModal').style.display = 'none';
+        }
+
+        /**
+         * Muestra los detalles de un outfit simple (con imagen GENERADA POR IA) en el modal.
+         * @param {number} outfitId - El ID del outfit en fallbackOutfits.
+         */
+        async function showOutfitDetails(outfitId) {
+            const outfit = fallbackOutfits.find(o => o.id === outfitId);
+            if (!outfit) return;
+
+            // Elementos del Modal
+            const imgElement = document.getElementById('simple-details-image');
+            const imgLoading = document.getElementById('image-loading');
+            const imgError = document.getElementById('image-error');
+
+            // 1. Prepara la UI: Inyecta título y lista de prendas
+            document.getElementById('simple-details-title').innerHTML = `${outfit.icon} ${outfit.name}`;
+            
+            const itemsHTML = `
+                <p class="font-bold text-stylia-purple mb-2">Prendas Clave:</p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                    ${outfit.items.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            `;
+            document.getElementById('simple-details-list').innerHTML = itemsHTML;
+
+            // 2. Muestra el modal en modo 'details' y reinicia el estado de la imagen
+            openLookModal('details');
+            imgElement.src = '';
+            imgElement.classList.add('hidden');
+            imgError.classList.add('hidden');
+            imgLoading.classList.remove('hidden');
+
+            // 3. Genera la imagen
+            try {
+                const imageUrl = await generateOutfitImage(outfit.promptDescription);
+                imgElement.src = imageUrl;
+                imgElement.classList.remove('hidden');
+            } catch (error) {
+                console.error("Fallo al generar la imagen:", error);
+                imgError.classList.remove('hidden');
+            } finally {
+                imgLoading.classList.add('hidden');
+            }
+        }
+
+
+        // --- FUNCIÓN GEMINI: ASESOR DE OUTFIT (Módulo Look) ---
+        async function generateOutfitAdvice() {
+            const baseItem = document.getElementById('baseItem').value;
+            const occasion = document.getElementById('occasion').value;
+            
+            if (!baseItem || !occasion) {
+                console.error('Error: Por favor, selecciona una prenda base e introduce una ocasión.');
+                return;
+            }
+
+            const systemPrompt = `Actúa como un estilista de moda personal, experto en crear outfits funcionales y estéticos. Tu única fuente de prendas es el inventario provisto. Debes crear un look completo (Superior, Inferior, Calzado, y un Accesorio/Exterior opcional) usando la prenda base indicada y el inventario disponible. Nombra el look, explica la elección de las prendas y ofrece un consejo de estilo final. Usa un tono moderno y amigable.`;
+            
+            const userQuery = `Mi inventario es:\n${inventoryContext}\n\nQuiero usar la prenda base: "${baseItem}" para la ocasión: "${occasion}". ¿Qué look completo de STYLIA me sugieres?`;
+            
+            showLoading('Analizando tu armario y ocasión...');
+            document.getElementById('look-form').classList.add('hidden');
+
+            try {
+                const resultText = await callGeminiApi(userQuery, systemPrompt);
+                document.getElementById('result-text').textContent = resultText;
+                document.getElementById('look-result').classList.remove('hidden');
+            } catch (error) {
+                document.getElementById('result-text').textContent = "⚠️ Error al conectar con el Asesor de IA. Inténtalo de nuevo más tarde.";
+                document.getElementById('look-result').classList.remove('hidden');
+                console.error("Error en la generación del outfit:", error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- FUNCIÓN GEMINI: ASISTENTE DE CUIDADO DE PRENDAS (Módulo Armario) ---
+        async function askMaintenanceAdvice(item) {
+            const systemPrompt = `Actúa como un asistente de mantenimiento y cuidado de prendas experto. Proporciona consejos específicos de lavado, secado y almacenamiento para la prenda indicada, basándote en su tipo y material (si está disponible). Sé conciso y práctico, usando emojis.`;
+            
+            const itemDetails = mockInventory.find(i => i.name === item);
+            if (!itemDetails) return; // No debe ocurrir con la lógica actual
+
+            const userQuery = `Prenda: ${itemDetails.name}. Tipo: ${itemDetails.type}. Color: ${itemDetails.color}. Material: ${itemDetails.material || 'No especificado'}.`;
+            
+            // Simulación de respuesta directa, no modal
+            const resultElementId = `maintenance-result-${itemDetails.id}`;
+            document.getElementById(resultElementId).textContent = "Consultando con la IA de Mantenimiento...";
+            document.getElementById(resultElementId).classList.remove('hidden');
+            
+            try {
+                const resultText = await callGeminiApi(userQuery, systemPrompt);
+                document.getElementById(resultElementId).textContent = resultText;
+            } catch (error) {
+                document.getElementById(resultElementId).textContent = "⚠️ Error al obtener el consejo de mantenimiento. Vuelve a intentarlo.";
+                console.error("Error en la generación del consejo:", error);
+            }
+        }
+        
+        // --- FUNCIONES DINÁMICAS DEL MÓDULO LOOK ---
+        
+        /**
+         * Renderiza el contenido dinámico del Look Recomendado.
+         * @param {string} eventValue - El valor del evento seleccionado (p.e., 'Reunion_Formal').
+         * @returns {string} HTML con los detalles del look.
+         */
+        function renderLookDetails(eventValue) {
+            const look = eventOptions.find(opt => opt.value === eventValue);
+            if (!look) return '';
+
+            return `
+                <div class="flex space-x-4 items-start">
+                    <!-- Outfit Visual Block (Estilo de la Imagen) -->
+                    <div class="w-24 h-24 rounded-xl flex items-center justify-center text-stylia-purple font-bold text-lg p-2 shadow-lg flex-shrink-0" style="background-image: linear-gradient(135deg, #a78bfa, #8a2be2); color: white;">
+                        Look
+                    </div>
+
+                    <!-- Detalles del Look -->
+                    <div class="flex-grow">
+                        <p id="look-name" class="text-xl font-extrabold text-gray-800 mb-2">${look.outfitName}</p>
+                        <ul id="look-items" class="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                            ${look.items.map(item => `
+                                <li>
+                                    ${item.name} <span class="text-xs text-gray-500">${item.detail}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Botón Principal (Preparar Outfit Ahora) -->
+                <button class="stylia-btn-primary w-full p-3 rounded-xl text-lg font-bold flex items-center justify-center mt-4">
+                    Preparar Outfit Ahora 🚀
+                </button>
+
+                <!-- Texto Secundario (Llamada al Modal No Sé Qué Ponerme) -->
+                <button onclick="openLookModal('ai')" class="w-full text-sm font-semibold text-stylia-purple/80 hover:text-stylia-purple transition stylia-btn-secondary p-1">
+                    ¡Ayuda! Analizar mi look
+                </button>
+            `;
+        }
+
+        /**
+         * Actualiza el look recomendado en la UI al cambiar la selección del evento.
+         * @param {string} eventValue - El valor del evento seleccionado.
+         */
+        function updateLookRecommendation(eventValue) {
+            currentEvent = eventValue;
+            const detailsContainer = document.getElementById('recommendedLookDetails');
+            if (detailsContainer) {
+                detailsContainer.innerHTML = renderLookDetails(eventValue);
+            }
+            
+            // También actualiza la etiqueta del evento en el contexto
+            const eventLabel = eventOptions.find(opt => opt.value === eventValue).label;
+            document.getElementById('selectedEventLabel').textContent = eventLabel;
+        }
+
+
+        // --- RENDERS DE MÓDULOS ---
+
+        function renderLookModule() {
+            // Datos de la nueva estructura basados en la imagen
+            const date = '23 de Octubre';
+            const weather = '25°C, Sol ☀️';
+            
+            // Renderiza el look inicial (currentEvent)
+            const initialLookHTML = renderLookDetails(currentEvent);
+
+            // Genera las opciones para el select
+            const eventOptionsHTML = eventOptions.map(opt => `
+                <option value="${opt.value}" ${opt.value === currentEvent ? 'selected' : ''}>
+                    ${opt.label}
+                </option>
+            `).join('');
+
+
+            const lookContent = `
+
+                <!-- Contexto Diario Card (Ahora con Select para Evento) -->
+                <section class="stylia-card p-5 mb-6 space-y-3 bg-white">
+                    <h3 class="text-lg font-bold text-stylia-purple flex items-center mb-3">
+                        🗓️ Información de hoy
+                    </h3>
+                    <div class="grid grid-cols-3 gap-4 text-sm text-gray-700">
+                        <!-- Fecha -->
+                        <div class="flex flex-col">
+                            <p class="font-medium text-gray-500 text-xs">Fecha:</p>
+                            <p class="font-semibold">${date}</p>
+                        </div>
+                        <!-- Clima -->
+                        <div class="flex flex-col">
+                            <p class="font-medium text-gray-500 text-xs">Tiempo:</p>
+                            <p class="font-semibold">${weather}</p>
+                        </div>
+                        <!-- Evento (Ahora es un Dropdown) -->
+                        <div class="flex flex-col col-span-3 md:col-span-1">
+                            <label for="eventSelect" class="font-medium text-gray-500 text-xs mb-1">Elige tu Evento:</label>
+                            <select id="eventSelect" onchange="updateLookRecommendation(this.value)"
+                                class="w-full text-gray-800 font-semibold border-gray-300 rounded-lg p-1.5 border focus:border-stylia-purple focus:ring focus:ring-stylia-purple focus:ring-opacity-50 text-sm">
+                                ${eventOptionsHTML}
+                            </select>
+                            <!-- Etiqueta de texto para mostrar el emoji en el mismo formato de antes -->
+                            <p id="selectedEventLabel" class="font-semibold mt-1 hidden"></p> 
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tu Look Recomendado por IA Card (Contenido Dinámico) -->
+                <section class="stylia-card p-5 space-y-4 bg-white border border-stylia-purple/20">
+                    <h3 class="text-xl font-extrabold text-stylia-purple">Tu look recomendado por IA</h3>
+                    
+                    <!-- Contenedor para inyectar los detalles del look, que se actualizará con JS -->
+                    <div id="recommendedLookDetails">
+                        ${initialLookHTML}
+                    </div>
+
+                </section>
+                
+                <!-- NUEVA SECCIÓN: Ayuda No Sé Qué Ponerme (Ahora dentro de una tarjeta 'stylia-card') -->
+                <section class="stylia-card p-5 space-y-4 mt-6 bg-white border border-gray-100">
+                    <h2 class="text-xl font-extrabold mb-2 text-gray-800 flex items-center">
+                        ❓ Ayuda: No Sé Qué Ponerme
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Explora sugerencias rápidas basadas en el estilo general.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        ${fallbackOutfits.map(outfit => `
+                            <!-- Tarjeta interna de outfit -->
+                            <div class="p-4 flex flex-col items-center text-center hover:bg-gray-50 transition rounded-xl border border-gray-100">
+                                <span class="text-3xl mb-2">${outfit.icon}</span>
+                                <p class="text-sm font-semibold text-gray-800 truncate w-full">${outfit.name}</p>
+                                <p class="text-xs text-gray-500 mt-1 h-8 overflow-hidden">${outfit.items.join(' + ')}</p>
+                                <button onclick="showOutfitDetails(${outfit.id})" class="mt-3 text-xs text-stylia-pink border border-stylia-pink/50 bg-stylia-pink/5 p-1 rounded-full font-semibold w-full stylia-btn-secondary">
+                                    Ver Detalles
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+                <!-- FIN NUEVA SECCIÓN -->
+
+            `;
+            return lookContent;
+        }
+
+        function renderArmarioModule() {
+            // Módulo de Mi Armario Digital (Gestión de Inventario)
+            const armarioContent = `
+                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Mi Armario Digital (${mockInventory.length} prendas)</h2>
+
+                <!-- Filtros y Opciones -->
+                <div class="flex space-x-2 overflow-x-auto pb-3 mb-4">
+                    <!-- Botones de filtro -->
+                    <button class="bg-stylia-purple text-white px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Todo</button>
+                    <button class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Superior</button>
+                    <button class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Inferior</button>
+                    <button class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Exterior</button>
+                    <button class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm flex-shrink-0 stylia-btn-secondary">Necesita Lavado</button>
+                </div>
+
+                <!-- Galería de Prendas -->
+                <div class="space-y-3">
+                    <!-- Sincronización en Tiempo Real -->
+                    <div class="flex items-center text-sm text-green-600 bg-green-50 p-3 rounded-xl">
+                        <span class="mr-2">🔄</span>
+                        Sincronizado: Última actualización hace 5 segundos.
+                    </div>
+                    ${mockInventory.map(item => `
+                        <div class="stylia-card p-3 flex flex-col">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <img src="${item.imageUrl}" alt="${item.name}" class="w-14 h-14 rounded-lg object-cover">
+                                    <div>
+                                        <p class="text-base font-semibold text-gray-800">${item.name}</p>
+                                        <p class="text-xs text-gray-500">Uso: ${item.lastUsed} | Material: ${item.material || 'N/A'} | Usos: ${item.uses}</p>
+                                        ${item.needsWash ? '<span class="text-xs font-bold text-stylia-pink">⚠️ ¡A lavar!</span>' : ''}
+                                    </div>
+                                </div>
+                                <button class="text-stylia-purple hover:text-stylia-pink text-sm font-medium stylia-btn-secondary">Editar</button>
+                            </div>
+                            
+                            <!-- FUNCIÓN GEMINI: Mantenimiento -->
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <button onclick="askMaintenanceAdvice('${item.name}')" class="w-full text-xs text-stylia-pink border border-stylia-pink/50 bg-stylia-pink/5 p-2 rounded-lg font-semibold flex items-center justify-center stylia-btn-secondary">
+                                    ✨ Pedir Consejo de Cuidado
+                                </button>
+                                <div id="maintenance-result-${item.id}" class="mt-2 text-xs text-gray-600 p-2 bg-gray-100 rounded hidden whitespace-pre-wrap"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            return armarioContent;
+        }
+
+        function renderEstadisticasModule() {
+            // Módulo de Estadísticas (Analytics)
+            // Calcular estadísticas simples
+            const totalUses = mockInventory.reduce((sum, item) => sum + item.uses, 0);
+            const mostUsedItem = mockInventory.reduce((max, item) => item.uses > max.uses ? item : max, { uses: -1, name: 'N/A' });
+            const leastUsedItem = mockInventory.reduce((min, item) => item.uses < min.uses ? item : min, { uses: Infinity, name: 'N/A' });
+            const avgUses = totalUses / mockInventory.length;
+            const utilizationRate = Math.round((totalUses / (mockInventory.length * 50)) * 100); // Tasa de uso basado en un potencial de 50 usos por prenda
+            
+            const statsContent = `
+                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Analítica de mi Armario 📈</h2>
+                <p class="text-sm text-gray-600 mb-6">Descubre cómo usas tus prendas y optimiza tu estilo.</p>
+
+                <!-- Resumen de Uso General -->
+                <section class="stylia-card p-5 mb-6 space-y-3">
+                    <h3 class="text-lg font-bold text-stylia-pink">Resumen Global (Últimos 30 días)</h3>
+                    <div class="flex justify-around text-center">
+                        <div>
+                            <p class="text-3xl font-extrabold text-stylia-purple">${totalUses}</p>
+                            <p class="text-sm text-gray-500">Total de Usos</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-extrabold text-stylia-purple">${mockInventory.length}</p>
+                            <p class="text-sm text-gray-500">Prendas en Armario</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-extrabold text-stylia-purple">${Math.round(avgUses)}</p>
+                            <p class="text-sm text-gray-500">Uso Promedio</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Barra de Utilización del Armario -->
+                <section class="stylia-card p-5 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">Tasa de Rotación</h3>
+                    <p class="text-sm text-gray-600 mb-2">Tu armario se ha utilizado al <span class="font-bold text-stylia-pink">${utilizationRate}%</span> de su potencial.</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: ${utilizationRate}%;"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Sube este porcentaje con los looks sugeridos por IA.</p>
+                </section>
+
+
+                <!-- Prendas Más/Menos Usadas -->
+                <section class="stylia-card p-5 space-y-4">
+                    <h3 class="text-lg font-bold text-gray-800">Prendas Destacadas</h3>
+                    
+                    <!-- Más Usada -->
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl">🥇</span>
+                            <div>
+                                <p class="text-sm font-semibold">${mostUsedItem.name}</p>
+                                <p class="text-xs text-gray-500">Más usada: ${mostUsedItem.uses} veces</p>
+                            </div>
+                        </div>
+                        <button class="text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded font-semibold stylia-btn-secondary">
+                            Ver Looks
+                        </button>
+                    </div>
+
+                    <!-- Menos Usada (Aleta de Inactividad) -->
+                    <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl">🥶</span>
+                            <div>
+                                <p class="text-sm font-semibold text-red-700">${leastUsedItem.name}</p>
+                                <p class="text-xs text-red-500">¡Solo ${leastUsedItem.uses} uso! Inactiva.</p>
+                            </div>
+                        </div>
+                        <button class="text-xs text-stylia-pink border border-stylia-pink/50 bg-stylia-pink/5 p-1 rounded font-semibold stylia-btn-secondary">
+                            Sugerir Look
+                        </button>
+                    </div>
+                </section>
+            `;
+            return statsContent;
+        }
+
+        function renderCompraModule() {
+            // Módulo de Compra del Armario STYLIA y Onboarding (Atracción)
+            const compraContent = `
+                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Compra tu Armario STYLIA 🛍️</h2>
+
+                <section class="stylia-card p-5 space-y-4">
+                    <h3 class="text-xl font-bold text-gray-800">Visualización de Realidad Aumentada (RA)</h3>
+                    <p class="text-sm text-gray-600">Visualiza cómo se vería el Armario STYLIA en tu hogar o prueba prendas en tu cuerpo.</p>
+                    <div class="ar-view">
+                        <p class="text-lg">Toca para Activar la Cámara AR</p>
+                    </div>
+                    <button class="stylia-btn-primary w-full p-3 rounded-full text-sm font-semibold">
+                        Abrir Cámara AR y Probar Prenda
+                    </button>
+                </section>
+
+                <section class="stylia-card p-5 space-y-4">
+                    <h3 class="text-xl font-bold text-gray-800">Tendencias y Recomendaciones</h3>
+                    <p class="text-sm text-gray-600">Basado en tus looks más usados, te recomendamos:</p>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Producto 1 -->
+                        <div class="stylia-card p-3 shadow-md">
+                            <img src="https://placehold.co/200x200/4CAF50/ffffff?text=Falda+Plisada" class="w-full h-32 object-cover rounded-xl mb-2">
+                            <p class="text-sm font-semibold truncate">Falda Plisada Verde</p>
+                            <p class="text-xs text-stylia-pink font-bold">49.99 €</p>
+                            <button class="w-full text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded-full mt-2 stylia-btn-secondary">Añadir al Carrito</button>
+                        </div>
+                        <!-- Producto 2 -->
+                        <div class="stylia-card p-3 shadow-md">
+                            <img src="https://placehold.co/200x200/9b59b6/ffffff?text=Jersey+Cashmere" class="w-full h-32 object-cover rounded-xl mb-2">
+                            <p class="text-sm font-semibold truncate">Jersey Cashmere Malva</p>
+                            <p class="text-xs text-stylia-pink font-bold">79.50 €</p>
+                            <button class="w-full text-xs text-stylia-purple border border-stylia-purple/50 bg-stylia-purple/5 p-1 rounded-full mt-2 stylia-btn-secondary">Añadir al Carrito</button>
+                        </div>
+                    </div>
+                </section>
+            `;
+            return compraContent;
+        }
+
+        function renderNotificacionesModule() {
+            // Módulo de Notificaciones y Alertas (Engagement)
+            const notifContent = `
+                <h2 class="text-2xl font-bold mb-4 text-stylia-purple">Alertas y Notificaciones (${mockNotifications.length}) 🔔</h2>
+
+                <div class="space-y-3">
+                    ${mockNotifications.map(notif => `
+                        <div class="stylia-card p-4 flex items-start space-x-3 border-l-4 ${notif.type === 'alert' ? 'border-red-500' : (notif.type === 'offer' ? 'border-stylia-pink' : 'border-stylia-purple')}">
+                            <span class="text-2xl pt-1 flex-shrink-0">${notif.icon}</span>
+                            <div>
+                                <p class="text-sm font-bold text-gray-800">${notif.title}</p>
+                                <p class="text-sm text-gray-600">${notif.content}</p>
+                                <p class="text-xs text-gray-400 mt-1">${notif.time}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button class="stylia-btn-secondary w-full text-stylia-purple p-3 rounded-full text-sm font-semibold border border-gray-300 bg-white mt-6">
+                    Marcar todo como leído
+                </button>
+            `;
+            return notifContent;
+        }
+
+        function renderPerfilModule() {
+            // Módulo de Perfil y Configuración (Personalización)
+            const userName = 'Ana López';
+            const userEmail = 'ana.lopez@email.com';
+            const memberSince = 'Enero 2024';
+            const currentStyle = 'Casual Chic';
+
+            const perfilContent = `
+                <h2 class="text-2xl font-bold mb-6 text-stylia-purple">Mi Perfil y Configuración 👤</h2>
+
+                <!-- Tarjeta de Usuario -->
+                <section class="stylia-card p-6 mb-6 flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-stylia-pink rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg">
+                        A
+                    </div>
+                    <div>
+                        <p class="text-xl font-bold text-gray-800">${userName}</p>
+                        <p class="text-sm text-gray-500">${userEmail}</p>
+                        <p class="text-xs text-gray-400 mt-1">Miembro desde: ${memberSince}</p>
+                    </div>
+                </section>
+
+                <!-- Preferencias y Estilo -->
+                <section class="stylia-card p-5 mb-6 space-y-3">
+                    <h3 class="text-lg font-bold text-stylia-pink">Mis Preferencias STYLIA</h3>
+                    
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <p class="font-medium text-gray-700">Estilo Actual Sugerido:</p>
+                        <p class="text-stylia-purple font-semibold">${currentStyle}</p>
+                    </div>
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <p class="font-medium text-gray-700">Talla de Camiseta:</p>
+                        <p class="text-gray-600">M</p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <p class="font-medium text-gray-700">Colores Favoritos:</p>
+                        <div class="flex space-x-1">
+                            <span class="w-4 h-4 rounded-full bg-blue-500 border border-gray-300"></span>
+                            <span class="w-4 h-4 rounded-full bg-green-500 border border-gray-300"></span>
+                            <span class="w-4 h-4 rounded-full bg-red-500 border border-gray-300"></span>
+                        </div>
+                    </div>
+
+                    <button class="w-full text-xs text-gray-600 border border-gray-300 bg-gray-50 p-2 rounded-lg mt-3 stylia-btn-secondary">
+                        Editar Preferencias
+                    </button>
+                </section>
+
+                <!-- Configuración de la App -->
+                <section class="stylia-card p-5 space-y-3">
+                    <h3 class="text-lg font-bold text-gray-800">Configuración</h3>
+                    
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm text-gray-700">Notificaciones Push</p>
+                        <!-- Interruptor de ejemplo -->
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-stylia-purple peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-stylia-purple"></div>
+                        </label>
+                    </div>
+
+                    <button class="w-full text-sm text-red-600 border border-red-300 bg-red-50 p-3 rounded-full mt-3 stylia-btn-secondary">
+                        Cerrar Sesión
+                    </button>
+                </section>
+            `;
+            return perfilContent;
+        }
+
+        // --- LÓGICA DE NAVEGACIÓN ---
+
+        function showModule(moduleName) {
+            // 1. Desactivar todos los botones y activar el seleccionado
+            Object.values(navButtons).forEach(btn => {
+                if (btn) btn.classList.remove('nav-active');
+            });
+            const activeNav = navButtons[moduleName];
+            if (activeNav) {
+                activeNav.classList.add('nav-active');
+            }
+
+            // 2. Renderizar el contenido
+            let contentHTML = '';
+            switch (moduleName) {
+                case 'look':
+                    contentHTML = renderLookModule();
+                    break;
+                case 'armario':
+                    contentHTML = renderArmarioModule();
+                    break;
+                case 'estadisticas':
+                    contentHTML = renderEstadisticasModule();
+                    break;
+                case 'compra':
+                    contentHTML = renderCompraModule();
+                    break;
+                case 'notificaciones':
+                    contentHTML = renderNotificacionesModule();
+                    break;
+                case 'perfil':
+                    contentHTML = renderPerfilModule();
+                    break;
+                default:
+                    contentHTML = '<div class="text-center p-10 text-gray-500">Módulo no encontrado.</div>';
+            }
+
+            contentDiv.innerHTML = contentHTML;
+            // Scroll al inicio del contenido
+            contentDiv.scrollTop = 0;
+            
+            // Si es el módulo Look, asegura la consistencia de la selección inicial
+            if (moduleName === 'look') {
+                setTimeout(() => {
+                    const select = document.getElementById('eventSelect');
+                    if(select) {
+                        select.value = currentEvent;
+                    }
+                }, 0);
+            }
+        }
+
+        // Inicialización: Mostrar el módulo 'look' por defecto al cargar la página
+        window.onload = function() {
+            showModule('look');
+        };
+    </script>
+</body>
+</html>
